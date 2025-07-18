@@ -1,298 +1,152 @@
-{
-  "name": "rag-simple-vector-store",
-  "nodes": [
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -280,
-        -240
-      ],
-      "id": "dd9e3461-43fd-4a99-90eb-c88d6d36b711",
-      "name": "When chat message received",
-      "webhookId": "83a5c60a-4100-417f-97ff-3248a3a24735"
-    },
-    {
-      "parameters": {
-        "options": {
-          "systemMessage": "You are a qmelocal expert.\n\nYou are tasked with answering a question using the provided information retrieved from the attached vector store. \n\nYour goal is to provide an accurate answer based on this information ONLY.\n\nIf you cannot answer the question using the provided information or no information is returned from the vector store, say \"Sorry I don't know\""
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2,
-      "position": [
-        -60,
-        -240
-      ],
-      "id": "fa51caeb-9434-4faf-915f-99f32e5b48fb",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "model": "openai/gpt-4o",
-        "options": {
-          "temperature": 0.4
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [
-        -180,
-        -20
-      ],
-      "id": "129f195c-ba1e-4cf0-bcd6-5c81ddf1eaa4",
-      "name": "OpenRouter Chat Model",
-      "credentials": {
-        "openRouterApi": {
-          "id": "zh9koQmZ1luJeIvo",
-          "name": "OpenRouter account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "contextWindowLength": 20
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.3,
-      "position": [
-        -20,
-        120
-      ],
-      "id": "286f5823-240b-49d9-8c61-2cba305584fd",
-      "name": "Simple Memory"
-    },
-    {
-      "parameters": {
-        "mode": "retrieve-as-tool",
-        "toolDescription": "This is repository of qmelocal-expert",
-        "memoryKey": {
-          "__rl": true,
-          "mode": "list",
-          "value": "vector_store_key"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-      "typeVersion": 1.3,
-      "position": [
-        220,
-        -60
-      ],
-      "id": "84bb4167-a1d4-41e2-a8bc-2d21cbf7d779",
-      "name": "Simple Vector Store"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
-      "typeVersion": 1.2,
-      "position": [
-        260,
-        280
-      ],
-      "id": "a57a87e5-540b-4858-b034-f53b961c7bc0",
-      "name": "Embeddings OpenAI",
-      "credentials": {
-        "openAiApi": {
-          "id": "vIor0Gf4ur6HFR5O",
-          "name": "OpenAi account"
-        }
-      }
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1300,
-        -140
-      ],
-      "id": "ae1c1e12-1459-4e83-aeb6-e6045aacfd23",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
-      "parameters": {
-        "mode": "insert",
-        "memoryKey": {
-          "__rl": true,
-          "mode": "list",
-          "value": "vector_store_key"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-      "typeVersion": 1.3,
-      "position": [
-        -840,
-        -140
-      ],
-      "id": "8f56cc5d-be53-4c84-a637-f016e840edb9",
-      "name": "Simple Vector Store1"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
-      "typeVersion": 1.2,
-      "position": [
-        -940,
-        40
-      ],
-      "id": "2755b332-7dd1-41e1-a426-63d108ebe9b6",
-      "name": "Embeddings OpenAI1",
-      "credentials": {
-        "openAiApi": {
-          "id": "vIor0Gf4ur6HFR5O",
-          "name": "OpenAi account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
-      "typeVersion": 1.1,
-      "position": [
-        -720,
-        80
-      ],
-      "id": "2fd17654-01f6-44e5-9086-f24a9fe3274a",
-      "name": "Default Data Loader"
-    },
-    {
-      "parameters": {
-        "operation": "get",
-        "documentURL": "https://docs.google.com/document/d/19oT15a0p0XL3V8cPfPrYtQBP7oULHbPCaaE0Ichiwy4/edit?usp=sharing"
-      },
-      "type": "n8n-nodes-base.googleDocs",
-      "typeVersion": 2,
-      "position": [
-        -1060,
-        -140
-      ],
-      "id": "fc238be9-119f-4a40-b659-5726e3ca225b",
-      "name": "Get a document",
-      "credentials": {
-        "googleDocsOAuth2Api": {
-          "id": "FEgem6k0aylSJQl9",
-          "name": "Google Docs account"
-        }
-      }
-    }
-  ],
-  "connections": {
-    "When chat message received": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "OpenRouter Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Memory": {
-      "ai_memory": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_memory",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Vector Store": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Embeddings OpenAI": {
-      "ai_embedding": [
-        [
-          {
-            "node": "Simple Vector Store",
-            "type": "ai_embedding",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Get a document",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Embeddings OpenAI1": {
-      "ai_embedding": [
-        [
-          {
-            "node": "Simple Vector Store1",
-            "type": "ai_embedding",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Default Data Loader": {
-      "ai_document": [
-        [
-          {
-            "node": "Simple Vector Store1",
-            "type": "ai_document",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get a document": {
-      "main": [
-        [
-          {
-            "node": "Simple Vector Store1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "staticData": null,
-  "pinData": {},
-  "triggerCount": 0,
-  "meta": {
-    "templateCredsSetupCompleted": true
-  }
-}
+ewogICJuYW1lIjogInJhZy1zaW1wbGUtdmVjdG9yLXN0b3JlIiwKICAibm9k
+ZXMiOiBbCiAgICB7CiAgICAgICJwYXJhbWV0ZXJzIjogewogICAgICAgICJv
+cHRpb25zIjoge30KICAgICAgfSwKICAgICAgInR5cGUiOiAiQG44bi9uOG4t
+bm9kZXMtbGFuZ2NoYWluLmNoYXRUcmlnZ2VyIiwKICAgICAgInR5cGVWZXJz
+aW9uIjogMS4xLAogICAgICAicG9zaXRpb24iOiBbCiAgICAgICAgLTI4MCwK
+ICAgICAgICAtMjQwCiAgICAgIF0sCiAgICAgICJpZCI6ICJkZDllMzQ2MS00
+M2ZkLTRhOTktOTBlYi1jODhkNmQzNmI3MTEiLAogICAgICAibmFtZSI6ICJX
+aGVuIGNoYXQgbWVzc2FnZSByZWNlaXZlZCIsCiAgICAgICJ3ZWJob29rSWQi
+OiAiODNhNWM2MGEtNDEwMC00MTdmLTk3ZmYtMzI0OGEzYTI0NzM1IgogICAg
+fSwKICAgIHsKICAgICAgInBhcmFtZXRlcnMiOiB7CiAgICAgICAgIm9wdGlv
+bnMiOiB7CiAgICAgICAgICAic3lzdGVtTWVzc2FnZSI6ICJZb3UgYXJlIGEg
+cW1lbG9jYWwgZXhwZXJ0LlxuXG5Zb3UgYXJlIHRhc2tlZCB3aXRoIGFuc3dl
+cmluZyBhIHF1ZXN0aW9uIHVzaW5nIHRoZSBwcm92aWRlZCBpbmZvcm1hdGlv
+biByZXRyaWV2ZWQgZnJvbSB0aGUgYXR0YWNoZWQgdmVjdG9yIHN0b3JlLiBc
+blxuWW91ciBnb2FsIGlzIHRvIHByb3ZpZGUgYW4gYWNjdXJhdGUgYW5zd2Vy
+IGJhc2VkIG9uIHRoaXMgaW5mb3JtYXRpb24gT05MWS5cblxuSWYgeW91IGNh
+bm5vdCBhbnN3ZXIgdGhlIHF1ZXN0aW9uIHVzaW5nIHRoZSBwcm92aWRlZCBp
+bmZvcm1hdGlvbiBvciBubyBpbmZvcm1hdGlvbiBpcyByZXR1cm5lZCBmcm9t
+IHRoZSB2ZWN0b3Igc3RvcmUsIHNheSBcIlNvcnJ5IEkgZG9uJ3Qga25vd1wi
+IgogICAgICAgIH0KICAgICAgfSwKICAgICAgInR5cGUiOiAiQG44bi9uOG4t
+bm9kZXMtbGFuZ2NoYWluLmFnZW50IiwKICAgICAgInR5cGVWZXJzaW9uIjog
+MiwKICAgICAgInBvc2l0aW9uIjogWwogICAgICAgIC02MCwKICAgICAgICAt
+MjQwCiAgICAgIF0sCiAgICAgICJpZCI6ICJmYTUxY2FlYi05NDM0LTRmYWYt
+OTE1Zi05OWYzMmU1YjQ4ZmIiLAogICAgICAibmFtZSI6ICJBSSBBZ2VudCIK
+ICAgIH0sCiAgICB7CiAgICAgICJwYXJhbWV0ZXJzIjogewogICAgICAgICJt
+b2RlbCI6ICJvcGVuYWkvZ3B0LTRvIiwKICAgICAgICAib3B0aW9ucyI6IHsK
+ICAgICAgICAgICJ0ZW1wZXJhdHVyZSI6IDAuNAogICAgICAgIH0KICAgICAg
+fSwKICAgICAgInR5cGUiOiAiQG44bi9uOG4tbm9kZXMtbGFuZ2NoYWluLmxt
+Q2hhdE9wZW5Sb3V0ZXIiLAogICAgICAidHlwZVZlcnNpb24iOiAxLAogICAg
+ICAicG9zaXRpb24iOiBbCiAgICAgICAgLTE4MCwKICAgICAgICAtMjAKICAg
+ICAgXSwKICAgICAgImlkIjogIjEyOWYxOTVjLWJhMWUtNGNmMC1iY2Q2LTVj
+ODFkZGYxZWFhNCIsCiAgICAgICJuYW1lIjogIk9wZW5Sb3V0ZXIgQ2hhdCBN
+b2RlbCIsCiAgICAgICJjcmVkZW50aWFscyI6IHsKICAgICAgICAib3BlblJv
+dXRlckFwaSI6IHsKICAgICAgICAgICJpZCI6ICJ6aDlrb1FtWjFsdUplSXZv
+IiwKICAgICAgICAgICJuYW1lIjogIk9wZW5Sb3V0ZXIgYWNjb3VudCIKICAg
+ICAgICB9CiAgICAgIH0KICAgIH0sCiAgICB7CiAgICAgICJwYXJhbWV0ZXJz
+IjogewogICAgICAgICJjb250ZXh0V2luZG93TGVuZ3RoIjogMjAKICAgICAg
+fSwKICAgICAgInR5cGUiOiAiQG44bi9uOG4tbm9kZXMtbGFuZ2NoYWluLm1l
+bW9yeUJ1ZmZlcldpbmRvdyIsCiAgICAgICJ0eXBlVmVyc2lvbiI6IDEuMywK
+ICAgICAgInBvc2l0aW9uIjogWwogICAgICAgIC0yMCwKICAgICAgICAxMjAK
+ICAgICAgXSwKICAgICAgImlkIjogIjI4NmY1ODIzLTI0MGItNDlkOS04YzYx
+LTJjYmEzMDU1ODRmZCIsCiAgICAgICJuYW1lIjogIlNpbXBsZSBNZW1vcnki
+CiAgICB9LAogICAgewogICAgICAicGFyYW1ldGVycyI6IHsKICAgICAgICAi
+bW9kZSI6ICJyZXRyaWV2ZS1hcy10b29sIiwKICAgICAgICAidG9vbERlc2Ny
+aXB0aW9uIjogIlRoaXMgaXMgcmVwb3NpdG9yeSBvZiBxbWVsb2NhbC1leHBl
+cnQiLAogICAgICAgICJtZW1vcnlLZXkiOiB7CiAgICAgICAgICAiX19ybCI6
+IHRydWUsCiAgICAgICAgICAibW9kZSI6ICJsaXN0IiwKICAgICAgICAgICJ2
+YWx1ZSI6ICJ2ZWN0b3Jfc3RvcmVfa2V5IgogICAgICAgIH0KICAgICAgfSwK
+ICAgICAgInR5cGUiOiAiQG44bi9uOG4tbm9kZXMtbGFuZ2NoYWluLnZlY3Rv
+clN0b3JlSW5NZW1vcnkiLAogICAgICAidHlwZVZlcnNpb24iOiAxLjMsCiAg
+ICAgICJwb3NpdGlvbiI6IFsKICAgICAgICAyMjAsCiAgICAgICAgLTYwCiAg
+ICAgIF0sCiAgICAgICJpZCI6ICI4NGJiNDE2Ny1hMWQ0LTQxZTItYThiYy0y
+ZDIxY2JmN2Q3NzkiLAogICAgICAibmFtZSI6ICJTaW1wbGUgVmVjdG9yIFN0
+b3JlIgogICAgfSwKICAgIHsKICAgICAgInBhcmFtZXRlcnMiOiB7CiAgICAg
+ICAgIm9wdGlvbnMiOiB7fQogICAgICB9LAogICAgICAidHlwZSI6ICJAbjhu
+L244bi1ub2Rlcy1sYW5nY2hhaW4uZW1iZWRkaW5nc09wZW5BaSIsCiAgICAg
+ICJ0eXBlVmVyc2lvbiI6IDEuMiwKICAgICAgInBvc2l0aW9uIjogWwogICAg
+ICAgIDI2MCwKICAgICAgICAyODAKICAgICAgXSwKICAgICAgImlkIjogImE1
+N2E4N2U1LTU0MGItNDg1OC1iMDM0LWY1M2I5NjFjN2JjMCIsCiAgICAgICJu
+YW1lIjogIkVtYmVkZGluZ3MgT3BlbkFJIiwKICAgICAgImNyZWRlbnRpYWxz
+IjogewogICAgICAgICJvcGVuQWlBcGkiOiB7CiAgICAgICAgICAiaWQiOiAi
+dklvcjBHZjR1cjZIRlI1TyIsCiAgICAgICAgICAibmFtZSI6ICJPcGVuQWkg
+YWNjb3VudCIKICAgICAgICB9CiAgICAgIH0KICAgIH0sCiAgICB7CiAgICAg
+ICJwYXJhbWV0ZXJzIjoge30sCiAgICAgICJ0eXBlIjogIm44bi1ub2Rlcy1i
+YXNlLm1hbnVhbFRyaWdnZXIiLAogICAgICAidHlwZVZlcnNpb24iOiAxLAog
+ICAgICAicG9zaXRpb24iOiBbCiAgICAgICAgLTEzMDAsCiAgICAgICAgLTE0
+MAogICAgICBdLAogICAgICAiaWQiOiAiYWUxYzFlMTItMTQ1OS00ZTgzLWFl
+YjYtZTYwNDVhYWNmZDIzIiwKICAgICAgIm5hbWUiOiAiV2hlbiBjbGlja2lu
+ZyDigJhFeGVjdXRlIHdvcmtmbG934oCZIgogICAgfSwKICAgIHsKICAgICAg
+InBhcmFtZXRlcnMiOiB7CiAgICAgICAgIm1vZGUiOiAiaW5zZXJ0IiwKICAg
+ICAgICAibWVtb3J5S2V5IjogewogICAgICAgICAgIl9fcmwiOiB0cnVlLAog
+ICAgICAgICAgIm1vZGUiOiAibGlzdCIsCiAgICAgICAgICAidmFsdWUiOiAi
+dmVjdG9yX3N0b3JlX2tleSIKICAgICAgICB9CiAgICAgIH0sCiAgICAgICJ0
+eXBlIjogIkBuOG4vbjhuLW5vZGVzLWxhbmdjaGFpbi52ZWN0b3JTdG9yZUlu
+TWVtb3J5IiwKICAgICAgInR5cGVWZXJzaW9uIjogMS4zLAogICAgICAicG9z
+aXRpb24iOiBbCiAgICAgICAgLTg0MCwKICAgICAgICAtMTQwCiAgICAgIF0s
+CiAgICAgICJpZCI6ICI4ZjU2Y2M1ZC1iZTUzLTRjODQtYTYzNy1mMDE2ZTg0
+MGVkYjkiLAogICAgICAibmFtZSI6ICJTaW1wbGUgVmVjdG9yIFN0b3JlMSIK
+ICAgIH0sCiAgICB7CiAgICAgICJwYXJhbWV0ZXJzIjogewogICAgICAgICJv
+cHRpb25zIjoge30KICAgICAgfSwKICAgICAgInR5cGUiOiAiQG44bi9uOG4t
+bm9kZXMtbGFuZ2NoYWluLmVtYmVkZGluZ3NPcGVuQWkiLAogICAgICAidHlw
+ZVZlcnNpb24iOiAxLjIsCiAgICAgICJwb3NpdGlvbiI6IFsKICAgICAgICAt
+OTQwLAogICAgICAgIDQwCiAgICAgIF0sCiAgICAgICJpZCI6ICIyNzU1YjMz
+Mi03ZGQxLTQxZTEtYTQyNi02M2QxMDhlYmU5YjYiLAogICAgICAibmFtZSI6
+ICJFbWJlZGRpbmdzIE9wZW5BSTEiLAogICAgICAiY3JlZGVudGlhbHMiOiB7
+CiAgICAgICAgIm9wZW5BaUFwaSI6IHsKICAgICAgICAgICJpZCI6ICJ2SW9y
+MEdmNHVyNkhGUjVPIiwKICAgICAgICAgICJuYW1lIjogIk9wZW5BaSBhY2Nv
+dW50IgogICAgICAgIH0KICAgICAgfQogICAgfSwKICAgIHsKICAgICAgInBh
+cmFtZXRlcnMiOiB7CiAgICAgICAgIm9wdGlvbnMiOiB7fQogICAgICB9LAog
+ICAgICAidHlwZSI6ICJAbjhuL244bi1ub2Rlcy1sYW5nY2hhaW4uZG9jdW1l
+bnREZWZhdWx0RGF0YUxvYWRlciIsCiAgICAgICJ0eXBlVmVyc2lvbiI6IDEu
+MSwKICAgICAgInBvc2l0aW9uIjogWwogICAgICAgIC03MjAsCiAgICAgICAg
+ODAKICAgICAgXSwKICAgICAgImlkIjogIjJmZDE3NjU0LTAxZjYtNDRlNS05
+MDg2LWYyNGE5ZmUzMjc0YSIsCiAgICAgICJuYW1lIjogIkRlZmF1bHQgRGF0
+YSBMb2FkZXIiCiAgICB9LAogICAgewogICAgICAicGFyYW1ldGVycyI6IHsK
+ICAgICAgICAib3BlcmF0aW9uIjogImdldCIsCiAgICAgICAgImRvY3VtZW50
+VVJMIjogImh0dHBzOi8vZG9jcy5nb29nbGUuY29tL2RvY3VtZW50L2QvMTlv
+VDE1YTBwMFhMM1Y4Y1BmUHJZdFFCUDdvVUxIYlBDYWFFMEljaGl3eTQvZWRp
+dD91c3A9c2hhcmluZyIKICAgICAgfSwKICAgICAgInR5cGUiOiAibjhuLW5v
+ZGVzLWJhc2UuZ29vZ2xlRG9jcyIsCiAgICAgICJ0eXBlVmVyc2lvbiI6IDIs
+CiAgICAgICJwb3NpdGlvbiI6IFsKICAgICAgICAtMTA2MCwKICAgICAgICAt
+MTQwCiAgICAgIF0sCiAgICAgICJpZCI6ICJmYzIzOGJlOS0xMTlmLTRhNDAt
+YjY1OS01NzI2ZTNjYTIyNWIiLAogICAgICAibmFtZSI6ICJHZXQgYSBkb2N1
+bWVudCIsCiAgICAgICJjcmVkZW50aWFscyI6IHsKICAgICAgICAiZ29vZ2xl
+RG9jc09BdXRoMkFwaSI6IHsKICAgICAgICAgICJpZCI6ICJGRWdlbTZrMGF5
+bFNKUWw5IiwKICAgICAgICAgICJuYW1lIjogIkdvb2dsZSBEb2NzIGFjY291
+bnQiCiAgICAgICAgfQogICAgICB9CiAgICB9CiAgXSwKICAiY29ubmVjdGlv
+bnMiOiB7CiAgICAiV2hlbiBjaGF0IG1lc3NhZ2UgcmVjZWl2ZWQiOiB7CiAg
+ICAgICJtYWluIjogWwogICAgICAgIFsKICAgICAgICAgIHsKICAgICAgICAg
+ICAgIm5vZGUiOiAiQUkgQWdlbnQiLAogICAgICAgICAgICAidHlwZSI6ICJt
+YWluIiwKICAgICAgICAgICAgImluZGV4IjogMAogICAgICAgICAgfQogICAg
+ICAgIF0KICAgICAgXQogICAgfSwKICAgICJPcGVuUm91dGVyIENoYXQgTW9k
+ZWwiOiB7CiAgICAgICJhaV9sYW5ndWFnZU1vZGVsIjogWwogICAgICAgIFsK
+ICAgICAgICAgIHsKICAgICAgICAgICAgIm5vZGUiOiAiQUkgQWdlbnQiLAog
+ICAgICAgICAgICAidHlwZSI6ICJhaV9sYW5ndWFnZU1vZGVsIiwKICAgICAg
+ICAgICAgImluZGV4IjogMAogICAgICAgICAgfQogICAgICAgIF0KICAgICAg
+XQogICAgfSwKICAgICJTaW1wbGUgTWVtb3J5IjogewogICAgICAiYWlfbWVt
+b3J5IjogWwogICAgICAgIFsKICAgICAgICAgIHsKICAgICAgICAgICAgIm5v
+ZGUiOiAiQUkgQWdlbnQiLAogICAgICAgICAgICAidHlwZSI6ICJhaV9tZW1v
+cnkiLAogICAgICAgICAgICAiaW5kZXgiOiAwCiAgICAgICAgICB9CiAgICAg
+ICAgXQogICAgICBdCiAgICB9LAogICAgIlNpbXBsZSBWZWN0b3IgU3RvcmUi
+OiB7CiAgICAgICJhaV90b29sIjogWwogICAgICAgIFsKICAgICAgICAgIHsK
+ICAgICAgICAgICAgIm5vZGUiOiAiQUkgQWdlbnQiLAogICAgICAgICAgICAi
+dHlwZSI6ICJhaV90b29sIiwKICAgICAgICAgICAgImluZGV4IjogMAogICAg
+ICAgICAgfQogICAgICAgIF0KICAgICAgXQogICAgfSwKICAgICJFbWJlZGRp
+bmdzIE9wZW5BSSI6IHsKICAgICAgImFpX2VtYmVkZGluZyI6IFsKICAgICAg
+ICBbCiAgICAgICAgICB7CiAgICAgICAgICAgICJub2RlIjogIlNpbXBsZSBW
+ZWN0b3IgU3RvcmUiLAogICAgICAgICAgICAidHlwZSI6ICJhaV9lbWJlZGRp
+bmciLAogICAgICAgICAgICAiaW5kZXgiOiAwCiAgICAgICAgICB9CiAgICAg
+ICAgXQogICAgICBdCiAgICB9LAogICAgIldoZW4gY2xpY2tpbmcg4oCYRXhl
+Y3V0ZSB3b3JrZmxvd+KAmSI6IHsKICAgICAgIm1haW4iOiBbCiAgICAgICAg
+WwogICAgICAgICAgewogICAgICAgICAgICAibm9kZSI6ICJHZXQgYSBkb2N1
+bWVudCIsCiAgICAgICAgICAgICJ0eXBlIjogIm1haW4iLAogICAgICAgICAg
+ICAiaW5kZXgiOiAwCiAgICAgICAgICB9CiAgICAgICAgXQogICAgICBdCiAg
+ICB9LAogICAgIkVtYmVkZGluZ3MgT3BlbkFJMSI6IHsKICAgICAgImFpX2Vt
+YmVkZGluZyI6IFsKICAgICAgICBbCiAgICAgICAgICB7CiAgICAgICAgICAg
+ICJub2RlIjogIlNpbXBsZSBWZWN0b3IgU3RvcmUxIiwKICAgICAgICAgICAg
+InR5cGUiOiAiYWlfZW1iZWRkaW5nIiwKICAgICAgICAgICAgImluZGV4Ijog
+MAogICAgICAgICAgfQogICAgICAgIF0KICAgICAgXQogICAgfSwKICAgICJE
+ZWZhdWx0IERhdGEgTG9hZGVyIjogewogICAgICAiYWlfZG9jdW1lbnQiOiBb
+CiAgICAgICAgWwogICAgICAgICAgewogICAgICAgICAgICAibm9kZSI6ICJT
+aW1wbGUgVmVjdG9yIFN0b3JlMSIsCiAgICAgICAgICAgICJ0eXBlIjogImFp
+X2RvY3VtZW50IiwKICAgICAgICAgICAgImluZGV4IjogMAogICAgICAgICAg
+fQogICAgICAgIF0KICAgICAgXQogICAgfSwKICAgICJHZXQgYSBkb2N1bWVu
+dCI6IHsKICAgICAgIm1haW4iOiBbCiAgICAgICAgWwogICAgICAgICAgewog
+ICAgICAgICAgICAibm9kZSI6ICJTaW1wbGUgVmVjdG9yIFN0b3JlMSIsCiAg
+ICAgICAgICAgICJ0eXBlIjogIm1haW4iLAogICAgICAgICAgICAiaW5kZXgi
+OiAwCiAgICAgICAgICB9CiAgICAgICAgXQogICAgICBdCiAgICB9CiAgfSwK
+ICAic2V0dGluZ3MiOiB7CiAgICAiZXhlY3V0aW9uT3JkZXIiOiAidjEiCiAg
+fSwKICAic3RhdGljRGF0YSI6IG51bGwsCiAgInBpbkRhdGEiOiB7fSwKICAi
+dHJpZ2dlckNvdW50IjogMCwKICAibWV0YSI6IHsKICAgICJ0ZW1wbGF0ZUNy
+ZWRzU2V0dXBDb21wbGV0ZWQiOiB0cnVlCiAgfQp9
