@@ -1,0 +1,63 @@
+{
+  "name": "webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2b31e7a0-b2ac-45ed-9def-3b78c25c4de9",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "c605443c-9ff7-41d9-ac21-86669719493f",
+      "name": "Webhook",
+      "webhookId": "2b31e7a0-b2ac-45ed-9def-3b78c25c4de9"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst item = items[0];\n\nconst authHeader = item.json.headers?.authorization || \"\";\nconst token = authHeader.replace(\"Bearer \", \"\");\nconst expectedToken = $vars.MY_SECRET_TOKEN\n\nif (token !== expectedToken) {\n  throw new Error(\"Unauthorized: Invalid token\");\n}\n\nreturn [{ json: { authorized: true } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        0
+      ],
+      "id": "a387018d-ba4d-49df-81e0-cf07a1fa8cfb",
+      "name": "Code",
+      "alwaysOutputData": true
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
