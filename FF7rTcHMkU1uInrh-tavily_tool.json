@@ -1,0 +1,43 @@
+{
+  "name": "tavily-tool",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Tavily Tool",
+        "height": 300,
+        "width": 700,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -140,
+        1000
+      ],
+      "typeVersion": 1,
+      "id": "a6ffb686-6964-4f1f-a7b3-e48dcaf6c6f8",
+      "name": "Sticky Note1",
+      "disabled": false
+    },
+    {
+      "id": "4780b610-37fc-4d5c-bcda-5b864eea5dfc",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -360,
+        1000
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": null
+}
