@@ -1,90 +1,52 @@
-{
-  "name": "tavily-tool",
-  "nodes": [
-    {
-      "parameters": {
-        "inputSource": "passthrough"
-      },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        0,
-        0
-      ],
-      "id": "34dba07c-0c8f-4b2a-ad0e-87a3b3827cff",
-      "name": "Workflow Input Trigger"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.tavily.com/search",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n    \"api_key\": \"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\",\n    \"query\": \"{{ $json.query.replace(/\"/g, '\\\\\"') }}\",\n    \"search_depth\": \"basic\",\n    \"include_answer\": true,\n    \"topic\": \"news\",\n    \"include_raw_content\": true,\n    \"max_results\": 3\n} ",
-        "options": {}
-      },
-      "id": "43f25372-0417-44a5-b88f-e3735f5dd17d",
-      "name": "Tavily",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        220,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "1ae0dd90-d1d0-494b-bd8b-1ef335f0bd8f",
-              "name": "response",
-              "value": "=[Source 1]\nURL: {{ $json.results[0].url }}\nContent: {{ $json.results[0].content }}\n\n[Source 2]\nURL: {{ $json.results[1].url }}\nContent: {{ $json.results[1].content }}\n\n[Source 2]\nURL: {{ $json.results[2].url }}\nContent: {{ $json.results[2].content }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        460,
-        0
-      ],
-      "id": "0fb64ac9-e338-49a8-ace2-1e7761298a92",
-      "name": "response"
-    }
-  ],
-  "connections": {
-    "Workflow Input Trigger": {
-      "main": [
-        [
-          {
-            "node": "Tavily",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Tavily": {
-      "main": [
-        [
-          {
-            "node": "response",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "staticData": null,
-  "pinData": {},
-  "triggerCount": 0,
-  "meta": null
-}
+ewogICJuYW1lIjogInRhdmlseS10b29sIiwKICAibm9kZXMiOiBbCiAgICB7
+CiAgICAgICJwYXJhbWV0ZXJzIjogewogICAgICAgICJpbnB1dFNvdXJjZSI6
+ICJwYXNzdGhyb3VnaCIKICAgICAgfSwKICAgICAgInR5cGUiOiAibjhuLW5v
+ZGVzLWJhc2UuZXhlY3V0ZVdvcmtmbG93VHJpZ2dlciIsCiAgICAgICJ0eXBl
+VmVyc2lvbiI6IDEuMSwKICAgICAgInBvc2l0aW9uIjogWwogICAgICAgIDAs
+CiAgICAgICAgMAogICAgICBdLAogICAgICAiaWQiOiAiMzRkYmEwN2MtMGM4
+Zi00YjJhLWFkMGUtODdhM2IzODI3Y2ZmIiwKICAgICAgIm5hbWUiOiAiV29y
+a2Zsb3cgSW5wdXQgVHJpZ2dlciIKICAgIH0sCiAgICB7CiAgICAgICJwYXJh
+bWV0ZXJzIjogewogICAgICAgICJtZXRob2QiOiAiUE9TVCIsCiAgICAgICAg
+InVybCI6ICJodHRwczovL2FwaS50YXZpbHkuY29tL3NlYXJjaCIsCiAgICAg
+ICAgInNlbmRCb2R5IjogdHJ1ZSwKICAgICAgICAic3BlY2lmeUJvZHkiOiAi
+anNvbiIsCiAgICAgICAgImpzb25Cb2R5IjogIj17XG4gICAgXCJhcGlfa2V5
+XCI6IFwidHZseS1kZXYtczFHaFdZRGdqTnRVWk1UNVJZeWIwc2dreHZPWEtK
+Q2hcIixcbiAgICBcInF1ZXJ5XCI6IFwie3sgJGpzb24ucXVlcnkucmVwbGFj
+ZSgvXCIvZywgJ1xcXFxcIicpIH19XCIsXG4gICAgXCJzZWFyY2hfZGVwdGhc
+IjogXCJiYXNpY1wiLFxuICAgIFwiaW5jbHVkZV9hbnN3ZXJcIjogdHJ1ZSxc
+biAgICBcInRvcGljXCI6IFwibmV3c1wiLFxuICAgIFwiaW5jbHVkZV9yYXdf
+Y29udGVudFwiOiB0cnVlLFxuICAgIFwibWF4X3Jlc3VsdHNcIjogM1xufSAi
+LAogICAgICAgICJvcHRpb25zIjoge30KICAgICAgfSwKICAgICAgImlkIjog
+IjQzZjI1MzcyLTA0MTctNDRhNS1iODhmLWUzNzM1ZjVkZDE3ZCIsCiAgICAg
+ICJuYW1lIjogIlRhdmlseSIsCiAgICAgICJ0eXBlIjogIm44bi1ub2Rlcy1i
+YXNlLmh0dHBSZXF1ZXN0IiwKICAgICAgInR5cGVWZXJzaW9uIjogNC4yLAog
+ICAgICAicG9zaXRpb24iOiBbCiAgICAgICAgMjIwLAogICAgICAgIDAKICAg
+ICAgXQogICAgfSwKICAgIHsKICAgICAgInBhcmFtZXRlcnMiOiB7CiAgICAg
+ICAgImFzc2lnbm1lbnRzIjogewogICAgICAgICAgImFzc2lnbm1lbnRzIjog
+WwogICAgICAgICAgICB7CiAgICAgICAgICAgICAgImlkIjogIjFhZTBkZDkw
+LWQxZDAtNDk0Yi1iZDhiLTFlZjMzNWYwYmQ4ZiIsCiAgICAgICAgICAgICAg
+Im5hbWUiOiAicmVzcG9uc2UiLAogICAgICAgICAgICAgICJ2YWx1ZSI6ICI9
+W1NvdXJjZSAxXVxuVVJMOiB7eyAkanNvbi5yZXN1bHRzWzBdLnVybCB9fVxu
+Q29udGVudDoge3sgJGpzb24ucmVzdWx0c1swXS5jb250ZW50IH19XG5cbltT
+b3VyY2UgMl1cblVSTDoge3sgJGpzb24ucmVzdWx0c1sxXS51cmwgfX1cbkNv
+bnRlbnQ6IHt7ICRqc29uLnJlc3VsdHNbMV0uY29udGVudCB9fVxuXG5bU291
+cmNlIDJdXG5VUkw6IHt7ICRqc29uLnJlc3VsdHNbMl0udXJsIH19XG5Db250
+ZW50OiB7eyAkanNvbi5yZXN1bHRzWzJdLmNvbnRlbnQgfX0iLAogICAgICAg
+ICAgICAgICJ0eXBlIjogInN0cmluZyIKICAgICAgICAgICAgfQogICAgICAg
+ICAgXQogICAgICAgIH0sCiAgICAgICAgIm9wdGlvbnMiOiB7fQogICAgICB9
+LAogICAgICAidHlwZSI6ICJuOG4tbm9kZXMtYmFzZS5zZXQiLAogICAgICAi
+dHlwZVZlcnNpb24iOiAzLjQsCiAgICAgICJwb3NpdGlvbiI6IFsKICAgICAg
+ICA0NjAsCiAgICAgICAgMAogICAgICBdLAogICAgICAiaWQiOiAiMGZiNjRh
+YzktZTMzOC00OWE4LWFjZTItMWU3NzYxMjk4YTkyIiwKICAgICAgIm5hbWUi
+OiAicmVzcG9uc2UiCiAgICB9CiAgXSwKICAiY29ubmVjdGlvbnMiOiB7CiAg
+ICAiV29ya2Zsb3cgSW5wdXQgVHJpZ2dlciI6IHsKICAgICAgIm1haW4iOiBb
+CiAgICAgICAgWwogICAgICAgICAgewogICAgICAgICAgICAibm9kZSI6ICJU
+YXZpbHkiLAogICAgICAgICAgICAidHlwZSI6ICJtYWluIiwKICAgICAgICAg
+ICAgImluZGV4IjogMAogICAgICAgICAgfQogICAgICAgIF0KICAgICAgXQog
+ICAgfSwKICAgICJUYXZpbHkiOiB7CiAgICAgICJtYWluIjogWwogICAgICAg
+IFsKICAgICAgICAgIHsKICAgICAgICAgICAgIm5vZGUiOiAicmVzcG9uc2Ui
+LAogICAgICAgICAgICAidHlwZSI6ICJtYWluIiwKICAgICAgICAgICAgImlu
+ZGV4IjogMAogICAgICAgICAgfQogICAgICAgIF0KICAgICAgXQogICAgfQog
+IH0sCiAgInNldHRpbmdzIjogewogICAgImV4ZWN1dGlvbk9yZGVyIjogInYx
+IgogIH0sCiAgInN0YXRpY0RhdGEiOiBudWxsLAogICJwaW5EYXRhIjoge30s
+CiAgInRyaWdnZXJDb3VudCI6IDAsCiAgIm1ldGEiOiBudWxsCn0=
