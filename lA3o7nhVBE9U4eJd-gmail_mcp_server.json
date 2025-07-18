@@ -1,0 +1,94 @@
+{
+  "name": "gmail-mcp-server",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        180
+      ],
+      "id": "820c3ecd-e6a8-4353-a406-31a30f41a1a0",
+      "name": "Send a message in Gmail",
+      "webhookId": "f588fd04-43fa-4c04-ada3-5ba96fd8a469",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TWzyK5TX0mj57hJ6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        360,
+        180
+      ],
+      "id": "e526016f-a30d-49dc-b13f-1cca578e0758",
+      "name": "Get many messages in Gmail",
+      "webhookId": "a3043c9f-8c9c-4ca3-bbf3-c2dd1bbdecc0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TWzyK5TX0mj57hJ6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "3d6f8b2e-c44d-4c66-8249-0224259e97eb"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        -20
+      ],
+      "id": "fe237b66-e0c2-45e4-a73e-c05990ea1532",
+      "name": "Gmail MCP Server",
+      "webhookId": "3d6f8b2e-c44d-4c66-8249-0224259e97eb"
+    }
+  ],
+  "connections": {
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 1,
+  "meta": null
+}
