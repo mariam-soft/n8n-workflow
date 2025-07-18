@@ -1,0 +1,279 @@
+{
+  "name": "airtable-append",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -360,
+        -80
+      ],
+      "id": "79df7854-0dd7-490e-affd-2ce2a17f7f6e",
+      "name": "When chat message received",
+      "webhookId": "7fbad386-0582-409b-8fe8-104978b08c13"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a helpful assistant\nToday is {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        -80
+      ],
+      "id": "3ea5b2c4-ae45-4d83-82d5-85561563972b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -40,
+        140
+      ],
+      "id": "bfad1f8a-9889-4679-a400-023c399e6102",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appeAOKzJ8xw6kr2p",
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://airtable.com/appeAOKzJ8xw6kr2p"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblCn52IuNkOS9YhI",
+          "mode": "list",
+          "cachedResultName": "Events",
+          "cachedResultUrl": "https://airtable.com/appeAOKzJ8xw6kr2p/tblCn52IuNkOS9YhI"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.event_title }}",
+            "description": "={{ $json.event_description }}",
+            "start_datetime": "={{ $json.start_time }}",
+            "end_datetime": "={{ $json.end_time }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_datetime",
+              "displayName": "start_datetime",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "end_datetime",
+              "displayName": "end_datetime",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        460,
+        -80
+      ],
+      "id": "b2b2a7db-08ec-4ba9-8aef-3a89fc56a8a3",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "p6G7Z1lNNhSngLd3",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[{\n\t\"event_title\": \"Event title\",\n\t\"event_description\": \"event desciption\",\n  \"start_time\": \"event start time\",\n  \"end_time\": \"event end time\"\n},\n{\n\t\"event_title\": \"Event title\",\n\t\"event_description\": \"event desciption\",\n  \"start_time\": \"event start time\",\n  \"end_time\": \"event end time\"\n}]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        140,
+        140
+      ],
+      "id": "02b7ffc4-f3c1-490a-a857-0b87a4df4eac",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        120
+      ],
+      "id": "4e4ca20a-7575-4396-9c80-886abe1b82f3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vIor0Gf4ur6HFR5O",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -80
+      ],
+      "id": "86ba223a-2fd5-4b01-9e1f-d7aa9ec01c7b",
+      "name": "Split Out"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
