@@ -1,0 +1,486 @@
+{
+  "name": "crm-lead-ingestion",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "8d31e164-0f7a-402b-8ebe-88bc1e8c4c6d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -840,
+        -200
+      ],
+      "id": "b5f03f52-27e5-4307-a52b-d3d71ea51146",
+      "name": "Webhook",
+      "webhookId": "8d31e164-0f7a-402b-8ebe-88bc1e8c4c6d"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8",
+          "mode": "list",
+          "cachedResultName": "crm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.body.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -620,
+        -200
+      ],
+      "id": "d8679ce0-bf9e-4941-8a65-a1f04cb37251",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "r2BsikKb39k76CaT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "00b7627b-5dec-41d9-94b5-0ddbb835b40e",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Re-engaged",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -960,
+        100
+      ],
+      "id": "5fcadd36-71e4-49f3-a648-ab38cd932bb2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8",
+          "mode": "list",
+          "cachedResultName": "crm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Email": "={{ $json.Email }}",
+            "Company": "={{ $json.Company }}",
+            "Status": "=Re-engaged"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -660,
+        40
+      ],
+      "id": "2041879c-43c5-41e3-b2eb-7ff825238b66",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "r2BsikKb39k76CaT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8",
+          "mode": "list",
+          "cachedResultName": "crm",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1C4kIwP0kPP86Qv63kN_zVU8cj3vGCV1PksYbOpEsSh8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Webhook').item.json.body.name }}",
+            "Email": "={{ $('Webhook').item.json.body.email }}",
+            "Company": "={{ $('Webhook').item.json.body.company }}",
+            "Status": "New"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -660,
+        220
+      ],
+      "id": "75923cd7-05c2-4789-873c-8982a9cf7053",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "r2BsikKb39k76CaT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7e2887c7-20be-46d8-bfb2-0cefe278258e",
+              "name": "Name",
+              "value": "={{ $('Webhook').item.json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "5f9a7f6c-a6f2-4db7-bb24-90386581a25f",
+              "name": "Email",
+              "value": "={{ $('Webhook').item.json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "151a6578-c8e4-41d0-8f45-9d65415e4b57",
+              "name": "Company",
+              "value": "={{ $('Webhook').item.json.body.company }}",
+              "type": "string"
+            },
+            {
+              "id": "09ecdd4c-9515-4272-9a2c-3ce3bfcf5611",
+              "name": "Status",
+              "value": "={{ $json.row_number ? \"Re-engaged\" : \"New\"}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        -200
+      ],
+      "id": "316ffa88-c3e3-4d0a-9939-3bbf9348f034",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -380,
+        140
+      ],
+      "id": "ea3d96e7-48d5-4619-9d73-b184c589eb2c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C096EUJKWFN",
+          "mode": "list",
+          "cachedResultName": "all-qme"
+        },
+        "text": "=📢 Lead Notification:  • Name: {{ $json.Name }} • Email: {{ $json.Email }} • Company:  {{ $json.Company }}• Status: {{$json.Status}} • Type: {{ $json.Status  === \"New\" ? \"🆕 New Lead\" :   \"🔄 Existing Lead (Re-engaged)\" }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -160,
+        140
+      ],
+      "id": "2c850e17-3385-4ece-82b6-4444d4605d20",
+      "name": "Send a message",
+      "webhookId": "96b233d3-b3a0-4816-b1e9-643fda4265bf",
+      "notesInFlow": false,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "HwBz81D0138Am1TL",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "fenexy.app.n8n.cloud",
+            "user-agent": "PostmanRuntime/7.44.1",
+            "content-length": "92",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cache-control": "no-cache",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "54.86.50.139",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "960ca9e8351939b0-IAD",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "postman-token": "c0f3cfa2-79ab-4a30-8b3b-51e16ce5beb1",
+            "x-forwarded-for": "54.86.50.139, 172.68.138.147",
+            "x-forwarded-host": "fenexy.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-4-644c4bcdb9-sht7s",
+            "x-is-trusted": "yes",
+            "x-real-ip": "54.86.50.139"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "email": "rimon@qme.com",
+            "name": "Rimon",
+            "company": "XYZ Soft"
+          },
+          "webhookUrl": "https://fenexy.app.n8n.cloud/webhook-test/8d31e164-0f7a-402b-8ebe-88bc1e8c4c6d",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
