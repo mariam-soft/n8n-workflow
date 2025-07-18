@@ -1,0 +1,179 @@
+{
+  "name": "rag-pinecone",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -360,
+        -140
+      ],
+      "id": "bcb20668-aee1-4b8a-a62e-9774ec0425ad",
+      "name": "When chat message received",
+      "webhookId": "6bebe7e5-bcd1-4d64-b6a7-79acce993afe"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a qmelocal expert.\n\nYou are tasked with answering a question using the provided information retrieved from the attached vector store. \n\nYour goal is to provide an accurate answer based on this information ONLY.\n\nIf you cannot answer the question using the provided information or no information is returned from the vector store, say \"Sorry I don't know\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -100,
+        -140
+      ],
+      "id": "2c1541a3-4cad-4401-ae05-0cc5317eb919",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "7868652c-27e7-4102-bd28-722dab53f3bf",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "zh9koQmZ1luJeIvo",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        20,
+        100
+      ],
+      "id": "54d9f971-8661-4fe5-b062-23fa2f803b4f",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "This is repository of qmelocal-expert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "qmelocal",
+          "mode": "list",
+          "cachedResultName": "qmelocal"
+        },
+        "options": {
+          "pineconeNamespace": "qme"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        220,
+        100
+      ],
+      "id": "e5f48d5e-f61f-444c-a93c-b0f9f4fd30d7",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "uQxU83vERXgqb7ym",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        180,
+        280
+      ],
+      "id": "438eaddf-9d4f-415d-a2e8-59da42338a05",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "vIor0Gf4ur6HFR5O",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
