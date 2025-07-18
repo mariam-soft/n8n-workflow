@@ -1,0 +1,98 @@
+{
+  "name": "contact-mcp-server",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "fields": [
+          "emailAddresses",
+          "names"
+        ],
+        "rawData": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        140
+      ],
+      "id": "c0b60ad6-df98-4a96-b846-bae0e4d34e41",
+      "name": "Get many contacts in Google Contacts",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "hzK0vbX3dQQYX9PP",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "familyName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Family_Name', ``, 'string') }}",
+        "givenName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Given_Name', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        140,
+        140
+      ],
+      "id": "6d360deb-fbd5-4fcc-b66a-436047b782f6",
+      "name": "Create a contact in Google Contacts",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "hzK0vbX3dQQYX9PP",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "5feacdb8-eabf-4be9-929d-e0f714db1493"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        -80
+      ],
+      "id": "92d006e0-4f78-4388-80ee-49f1d1bc1655",
+      "name": "Contact MCP Server",
+      "webhookId": "5feacdb8-eabf-4be9-929d-e0f714db1493"
+    }
+  ],
+  "connections": {
+    "Get many contacts in Google Contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "Contact MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a contact in Google Contacts": {
+      "ai_tool": [
+        [
+          {
+            "node": "Contact MCP Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 1,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
