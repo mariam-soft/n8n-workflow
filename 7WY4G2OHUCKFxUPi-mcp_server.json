@@ -1,0 +1,186 @@
+{
+  "name": "mcp-server",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -200,
+        -100
+      ],
+      "id": "8c38aa1a-a58f-4bae-a3c5-b0529fc9130b",
+      "name": "When chat message received",
+      "webhookId": "7fa04dcc-2a29-43e5-ad21-4617ccbbdc9c"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a helpful assistant.\n\nGmail MCP Client: use this tool for all email related queries.\n\nCalendar MCP Client: use this tool for all event related queries.\n\nContact MCP Client: use this tool for all contact related queries.\n\nPlease Note Current date/time: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        180,
+        -100
+      ],
+      "id": "809d7da7-0154-481c-ad33-6e2d037c19a5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -120,
+        120
+      ],
+      "id": "07345e89-e496-4adb-984d-de81bfa7b56c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vIor0Gf4ur6HFR5O",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        60,
+        120
+      ],
+      "id": "39731ec4-e670-4224-9cd1-30d6bc50b231",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://fenexy.app.n8n.cloud/mcp/3d6f8b2e-c44d-4c66-8249-0224259e97eb"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        260,
+        120
+      ],
+      "id": "c9a3f9af-b2ba-4ebb-8566-3f0ed5d9e855",
+      "name": "Gmail MCP Client"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://fenexy.app.n8n.cloud/mcp/3b14ffdd-70cb-4540-b893-c08d81dd2f86"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        480,
+        120
+      ],
+      "id": "b06e6932-9c11-4d42-9b43-436ec2816c20",
+      "name": "Calendar MCP Client"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://fenexy.app.n8n.cloud/mcp/5feacdb8-eabf-4be9-929d-e0f714db1493"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        680,
+        120
+      ],
+      "id": "9c441324-8dda-4523-a723-530bb23d1d3c",
+      "name": "Contact MCP Client"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
