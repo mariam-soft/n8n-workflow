@@ -1,0 +1,219 @@
+{
+  "name": "google-sheet-insert",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        -80
+      ],
+      "id": "142e4e1d-d890-444b-b2e6-1708b8d759a6",
+      "name": "When chat message received",
+      "webhookId": "1d0c8026-218e-457e-842e-f6d658f466f2"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "##  Role\n\nYou are a highly intelligent, language-savvy personal expense tracker.\n\n## Task\n\nYou listen to natural language descriptions of expenses and update the **Google Sheet** accordingly.\n\n## Behavior Instructions\n\n* Always **analyze and extract information** from full sentences like “I paid 1500 Taka for lunch” or “Gave 200 to Rahim as loan.”\n* **Do not ask for clarification** unless the input is truly ambiguous or missing critical values (like the amount or description).\n* Use **intelligent inference** to fill in missing values:\n\n  * “today” = current date\n  * “loan”, “rent”, “bill”, “food”, etc. can help classify **Type**\n  * If \"Business\" or \"Office\" is mentioned, set **Personal/Business** = Business. Else, default to Personal.\n\n## 📄 Sheet Format\n\n| **Date**   | **Personal/Business** | **Description**         | **Amount(BDT)** | **Type** |\n| ---------- | --------------------- | ----------------------- | --------------- | -------- |\n| 10-07-2025 | Personal              | Grocery bill settlement | 1500            | Bill     |\n\n---\n\n## Response Format After Entry\n\n```plaintext\nExpense recorded:\nDate: 10-07-2025  \nPersonal/Business: Personal  \nDescription: Grocery bill settlement  \nAmount(BDT): 1500  \nType: Bill  \n```\n\n---\n\n## Examples of How to Interpret:\n\n| User Input                                                                    | Parsed Data                                                                      |\n| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |\n| “On July 10th, I settled my outstanding bill of 1500 Tk at the grocery shop.” | Date: 10-07-2025, Description: Grocery bill settlement, Amount: 1500, Type: Bill |\n| “I gave 300 Taka to Karim as a loan”                                          | Date: Today, Description: Loan to Karim, Amount: 300, Type: Loan                 |\n| “Paid 700 for dinner with friends”                                            | Date: Today, Description: Dinner with friends, Amount: 700, Type: Food           |\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        -80
+      ],
+      "id": "c43f231e-ae0b-4025-a551-7be804b45842",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        140
+      ],
+      "id": "ed4294d3-9a40-462c-a5e6-5b1fbf9c2263",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vIor0Gf4ur6HFR5O",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -300,
+        140
+      ],
+      "id": "35bf7af5-3018-4325-a253-62ff4e740e84",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Ddifw7B2368XHQHZzejiX1iMFMlMw5UnatVreARo68Y",
+          "mode": "list",
+          "cachedResultName": "expense-account",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ddifw7B2368XHQHZzejiX1iMFMlMw5UnatVreARo68Y/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ddifw7B2368XHQHZzejiX1iMFMlMw5UnatVreARo68Y/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Date', ``, 'string') }}",
+            "Personal/Business": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Personal_Business', ``, 'string') }}",
+            "Description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+            "Amount(BDT)": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Amount_BDT_', ``, 'string') }}",
+            "Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Type', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Personal/Business",
+              "displayName": "Personal/Business",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount(BDT)",
+              "displayName": "Amount(BDT)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -180,
+        140
+      ],
+      "id": "512b5ba0-580d-47c5-a2d1-e66e91ec8bfd",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "r2BsikKb39k76CaT",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
