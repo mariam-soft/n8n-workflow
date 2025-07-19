@@ -1,641 +1,379 @@
-{
-  "name": "gdrive-to-github",
-  "nodes": [
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 9
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -620,
-        20
-      ],
-      "id": "d38c3191-f0b5-409e-97e6-cb919008cc6b",
-      "name": "Schedule Trigger"
-    },
-    {
-      "parameters": {
-        "resource": "fileFolder",
-        "returnAll": true,
-        "filter": {
-          "folderId": {
-            "__rl": true,
-            "value": "1ZsKMJkIys4Y8SE80lyCDSScfGkP9gx-z",
-            "mode": "list",
-            "cachedResultName": "n8n-workflows",
-            "cachedResultUrl": "https://drive.google.com/drive/folders/1ZsKMJkIys4Y8SE80lyCDSScfGkP9gx-z"
-          }
-        },
-        "options": {
-          "fields": [
-            "*"
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        -620,
-        380
-      ],
-      "id": "2e4f9ed9-d23c-4da8-b8f6-4578254f54d8",
-      "name": "Search files and folders",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "EpWTX1ZPdT9rU0AU",
-          "name": "Google Drive account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Load previous run state (you'll store this using n8n Static Data)\nconst previous = $getWorkflowStaticData(\"global\");\nconst lastRun = previous.lastRun || {};\n\nconst newFiles = $input.all().filter((item) => {\n  const file = item.json;\n  return !lastRun[file.id] || lastRun[file.id] !== file.modifiedTime;\n});\n\n// Update state for next run\nconst newState = {};\n$input.all().forEach((item) => {\n  const file = item.json;\n  newState[file.id] = file.modifiedTime;\n});\nprevious.lastRun = newState;\n\nreturn newFiles.map((f) => ({ json: f.json }));\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -620,
-        1515
-      ],
-      "id": "2fcf3a85-9e9a-4058-a772-15b06effb678",
-      "name": "Code"
-    },
-    {
-      "parameters": {
-        "operation": "download",
-        "fileId": {
-          "__rl": true,
-          "value": "={{ $json.id }}",
-          "mode": "id"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        -620,
-        945
-      ],
-      "id": "0ad8095d-38c4-488b-8b6c-42bcb4a49c4a",
-      "name": "Download file",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "EpWTX1ZPdT9rU0AU",
-          "name": "Google Drive account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "authentication": "oAuth2",
-        "resource": "file",
-        "owner": {
-          "__rl": true,
-          "value": "mariam-soft",
-          "mode": "name"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "n8n-workflow",
-          "mode": "list",
-          "cachedResultName": "n8n-workflow",
-          "cachedResultUrl": "https://github.com/mariam-soft/n8n-workflow"
-        },
-        "filePath": "={{ $('Loop Over Items').item.json.name }}",
-        "fileContent": "={{ $('Loop Over Items').item.json.data }}",
-        "commitMessage": "Auto-update from Google Drive",
-        "additionalParameters": {
-          "author": {
-            "name": "mariam-soft",
-            "email": "tech.mariamsoft@gmail.com"
-          },
-          "branch": {
-            "branch": "main"
-          }
-        }
-      },
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
-      "position": [
-        480,
-        995
-      ],
-      "id": "510efde0-b91e-442b-b236-9b3fc8bb8c6c",
-      "name": "Create a file",
-      "webhookId": "7685c2be-d011-4a43-a8a0-075800eaeafe",
-      "credentials": {
-        "githubOAuth2Api": {
-          "id": "jMzsKAoWD1dgLeNK",
-          "name": "GitHub account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "binaryToPropery",
-        "options": {
-          "encoding": "base64",
-          "keepSource": "json"
-        }
-      },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1,
-      "position": [
-        -400,
-        945
-      ],
-      "id": "52f802ee-6444-48db-8757-aa230bddca73",
-      "name": "Extract from File"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "b05da137-548b-40df-b80d-1c8f446d4b58",
-              "leftValue": "={{ $json.name }}",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "exists",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        260,
-        720
-      ],
-      "id": "e342a559-41be-482c-938e-460b502ae252",
-      "name": "If"
-    },
-    {
-      "parameters": {
-        "authentication": "oAuth2",
-        "resource": "file",
-        "operation": "edit",
-        "owner": {
-          "__rl": true,
-          "value": "mariam-soft",
-          "mode": "name"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "n8n-workflow",
-          "mode": "list",
-          "cachedResultName": "n8n-workflow",
-          "cachedResultUrl": "https://github.com/mariam-soft/n8n-workflow"
-        },
-        "filePath": "={{ $json.name }}",
-        "fileContent": "={{ $json.content }}",
-        "commitMessage": "updated the file",
-        "additionalParameters": {
-          "branch": {
-            "branch": "main"
-          },
-          "author": {
-            "name": "mariam-soft",
-            "email": "tech.mariamsoft@gmail.com"
-          }
-        }
-      },
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
-      "position": [
-        480,
-        795
-      ],
-      "id": "55c96ae9-4533-41a2-9ef0-a54a807872a9",
-      "name": "Edit a file",
-      "webhookId": "f2178e28-2de8-4e46-9800-b0b55065d138",
-      "credentials": {
-        "githubOAuth2Api": {
-          "id": "jMzsKAoWD1dgLeNK",
-          "name": "GitHub account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "authentication": "oAuth2",
-        "resource": "file",
-        "operation": "get",
-        "owner": {
-          "__rl": true,
-          "value": "mariam-soft",
-          "mode": "name"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "n8n-workflow",
-          "mode": "list",
-          "cachedResultName": "n8n-workflow",
-          "cachedResultUrl": "https://github.com/mariam-soft/n8n-workflow"
-        },
-        "filePath": "={{ $json.name }}",
-        "asBinaryProperty": false,
-        "additionalParameters": {}
-      },
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
-      "position": [
-        40,
-        720
-      ],
-      "id": "a8787425-1a1f-43bd-8d49-911ee4808c9d",
-      "name": "Get a file",
-      "webhookId": "d9abb1ed-e106-45b2-89d5-42c0ebc5ea6e",
-      "alwaysOutputData": true,
-      "credentials": {
-        "githubOAuth2Api": {
-          "id": "jMzsKAoWD1dgLeNK",
-          "name": "GitHub account"
-        }
-      },
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        -180,
-        945
-      ],
-      "id": "9cf7d18c-0c9c-478d-a97f-ed5c92e956f3",
-      "name": "Loop Over Items"
-    },
-    {
-      "parameters": {
-        "operation": "appendOrUpdate",
-        "documentId": {
-          "__rl": true,
-          "value": "1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA",
-          "mode": "list",
-          "cachedResultName": "n8n-workflow-files",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA/edit#gid=0"
-        },
-        "columns": {
-          "mappingMode": "autoMapInputData",
-          "value": {},
-          "matchingColumns": [
-            "Modified Time"
-          ],
-          "schema": [
-            {
-              "id": "FileName",
-              "displayName": "FileName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "LastModified",
-              "displayName": "LastModified",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.6,
-      "position": [
-        -620,
-        -260
-      ],
-      "id": "ebf635b4-996f-427a-83a9-efa11fcb683a",
-      "name": "Append or update row in sheet",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "r2BsikKb39k76CaT",
-          "name": "Google Sheets account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "return items.map(item => ({\n  json: {\n    FileName: item.json.name,\n    LastModified: item.json.modifiedTime,\n    id: item.json.id\n  }\n}));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -620,
-        1255
-      ],
-      "id": "94aec4e1-42d8-406a-bf83-756996cc65c9",
-      "name": "Code1"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Search the designated Google Drive path and retrieve metadata for all files and folders (id, name, modifiedTime). Access a Google Sheet containing stored file records. Compare each file against the sheet:\n\nIf the file does not exist in the sheet → mark as new\n\nIf modifiedTime is newer than the sheet record → mark as updated\n\nIgnore unchanged files\n\nReturn an array with new or updated files in this format:\n[\n  {\n    \"id\": \"id\",\n    \"name\": \"name\",\n    \"modifiedTime\": \"modifiedTime\"\n  }\n]\nRespond with only the JSON array, no explanation.\n",
-        "options": {
-          "systemMessage": "You are a smart automation assistant running inside n8n. Your task is to monitor a specific Google Drive path, detect newly added or updated files, and compare their metadata against existing records in a Google Sheet.\n\nBe efficient, precise, and avoid duplication. Exclude any files that haven't changed."
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2,
-      "position": [
-        -360,
-        20
-      ],
-      "id": "6c4de8f6-8fbb-4388-a16b-2629a7ee5d36",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "gpt-4o",
-          "mode": "list",
-          "cachedResultName": "gpt-4o"
-        },
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.2,
-      "position": [
-        -400,
-        240
-      ],
-      "id": "69ca2a9d-bb23-4c30-a0b7-2291f024a59a",
-      "name": "OpenAI Chat Model",
-      "credentials": {
-        "openAiApi": {
-          "id": "vIor0Gf4ur6HFR5O",
-          "name": "OpenAi account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "fileFolder",
-        "returnAll": true,
-        "filter": {
-          "folderId": {
-            "__rl": true,
-            "value": "1ZsKMJkIys4Y8SE80lyCDSScfGkP9gx-z",
-            "mode": "list",
-            "cachedResultName": "n8n-workflows",
-            "cachedResultUrl": "https://drive.google.com/drive/folders/1ZsKMJkIys4Y8SE80lyCDSScfGkP9gx-z"
-          }
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDriveTool",
-      "typeVersion": 3,
-      "position": [
-        -280,
-        240
-      ],
-      "id": "61ebeea8-f855-4869-8efd-4c382223096b",
-      "name": "Google Drive Search Tool",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "EpWTX1ZPdT9rU0AU",
-          "name": "Google Drive account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA",
-          "mode": "list",
-          "cachedResultName": "n8n-workflow-files",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA/edit#gid=0"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleSheetsTool",
-      "typeVersion": 4.6,
-      "position": [
-        -160,
-        240
-      ],
-      "id": "63e5acf6-f030-4975-8dd8-d37e36495c9b",
-      "name": "Get row(s) in sheet in Google Sheets",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "r2BsikKb39k76CaT",
-          "name": "Google Sheets account"
-        }
-      }
-    }
-  ],
-  "pinData": {},
-  "connections": {
-    "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Search files and folders": {
-      "main": [
-        []
-      ]
-    },
-    "Code": {
-      "main": [
-        []
-      ]
-    },
-    "Download file": {
-      "main": [
-        [
-          {
-            "node": "Extract from File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract from File": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If": {
-      "main": [
-        [
-          {
-            "node": "Edit a file",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create a file",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get a file": {
-      "main": [
-        [
-          {
-            "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Over Items": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Get a file",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create a file": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit a file": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code1": {
-      "main": [
-        []
-      ]
-    },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Google Drive Search Tool": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get row(s) in sheet in Google Sheets": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "04e28bd0-b915-4c97-bc79-03c80c83f6fa",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "7cece99d5df581003ad30993f8b8f91850bb4876aaea85cec2b5c79a8466f3cd"
-  },
-  "id": "2IrcuXyg6v8B7ZsZ",
-  "tags": []
-}
+ewogICJuYW1lIjogImdkcml2ZS10by1naXRodWIiLAogICJub2RlcyI6IFsK
+ICAgIHsKICAgICAgInBhcmFtZXRlcnMiOiB7CiAgICAgICAgInJ1bGUiOiB7
+CiAgICAgICAgICAiaW50ZXJ2YWwiOiBbCiAgICAgICAgICAgIHsKICAgICAg
+ICAgICAgICAidHJpZ2dlckF0SG91ciI6IDkKICAgICAgICAgICAgfQogICAg
+ICAgICAgXQogICAgICAgIH0KICAgICAgfSwKICAgICAgInR5cGUiOiAibjhu
+LW5vZGVzLWJhc2Uuc2NoZWR1bGVUcmlnZ2VyIiwKICAgICAgInR5cGVWZXJz
+aW9uIjogMS4yLAogICAgICAicG9zaXRpb24iOiBbCiAgICAgICAgLTYyMCwK
+ICAgICAgICAyMAogICAgICBdLAogICAgICAiaWQiOiAiZDM4YzMxOTEtZjBi
+NS00MDllLTk3ZTYtY2I5MTkwMDhjYzZiIiwKICAgICAgIm5hbWUiOiAiU2No
+ZWR1bGUgVHJpZ2dlciIKICAgIH0sCiAgICB7CiAgICAgICJwYXJhbWV0ZXJz
+IjogewogICAgICAgICJyZXNvdXJjZSI6ICJmaWxlRm9sZGVyIiwKICAgICAg
+ICAicmV0dXJuQWxsIjogdHJ1ZSwKICAgICAgICAiZmlsdGVyIjogewogICAg
+ICAgICAgImZvbGRlcklkIjogewogICAgICAgICAgICAiX19ybCI6IHRydWUs
+CiAgICAgICAgICAgICJ2YWx1ZSI6ICIxWnNLTUprSXlzNFk4U0U4MGx5Q0RT
+U2NmR2tQOWd4LXoiLAogICAgICAgICAgICAibW9kZSI6ICJsaXN0IiwKICAg
+ICAgICAgICAgImNhY2hlZFJlc3VsdE5hbWUiOiAibjhuLXdvcmtmbG93cyIs
+CiAgICAgICAgICAgICJjYWNoZWRSZXN1bHRVcmwiOiAiaHR0cHM6Ly9kcml2
+ZS5nb29nbGUuY29tL2RyaXZlL2ZvbGRlcnMvMVpzS01Ka0l5czRZOFNFODBs
+eUNEU1NjZkdrUDlneC16IgogICAgICAgICAgfQogICAgICAgIH0sCiAgICAg
+ICAgIm9wdGlvbnMiOiB7CiAgICAgICAgICAiZmllbGRzIjogWwogICAgICAg
+ICAgICAiKiIKICAgICAgICAgIF0KICAgICAgICB9CiAgICAgIH0sCiAgICAg
+ICJ0eXBlIjogIm44bi1ub2Rlcy1iYXNlLmdvb2dsZURyaXZlIiwKICAgICAg
+InR5cGVWZXJzaW9uIjogMywKICAgICAgInBvc2l0aW9uIjogWwogICAgICAg
+IC02MjAsCiAgICAgICAgMzgwCiAgICAgIF0sCiAgICAgICJpZCI6ICIyZTRm
+OWVkOS1kMjNjLTRkYTgtYjhmNi00NTc4MjU0ZjU0ZDgiLAogICAgICAibmFt
+ZSI6ICJTZWFyY2ggZmlsZXMgYW5kIGZvbGRlcnMiLAogICAgICAiY3JlZGVu
+dGlhbHMiOiB7CiAgICAgICAgImdvb2dsZURyaXZlT0F1dGgyQXBpIjogewog
+ICAgICAgICAgImlkIjogIkVwV1RYMVpQZFQ5clUwQVUiLAogICAgICAgICAg
+Im5hbWUiOiAiR29vZ2xlIERyaXZlIGFjY291bnQgMiIKICAgICAgICB9CiAg
+ICAgIH0KICAgIH0sCiAgICB7CiAgICAgICJwYXJhbWV0ZXJzIjogewogICAg
+ICAgICJqc0NvZGUiOiAiLy8gTG9hZCBwcmV2aW91cyBydW4gc3RhdGUgKHlv
+dSdsbCBzdG9yZSB0aGlzIHVzaW5nIG44biBTdGF0aWMgRGF0YSlcbmNvbnN0
+IHByZXZpb3VzID0gJGdldFdvcmtmbG93U3RhdGljRGF0YShcImdsb2JhbFwi
+KTtcbmNvbnN0IGxhc3RSdW4gPSBwcmV2aW91cy5sYXN0UnVuIHx8IHt9O1xu
+XG5jb25zdCBuZXdGaWxlcyA9ICRpbnB1dC5hbGwoKS5maWx0ZXIoKGl0ZW0p
+ID0+IHtcbiAgY29uc3QgZmlsZSA9IGl0ZW0uanNvbjtcbiAgcmV0dXJuICFs
+YXN0UnVuW2ZpbGUuaWRdIHx8IGxhc3RSdW5bZmlsZS5pZF0gIT09IGZpbGUu
+bW9kaWZpZWRUaW1lO1xufSk7XG5cbi8vIFVwZGF0ZSBzdGF0ZSBmb3IgbmV4
+dCBydW5cbmNvbnN0IG5ld1N0YXRlID0ge307XG4kaW5wdXQuYWxsKCkuZm9y
+RWFjaCgoaXRlbSkgPT4ge1xuICBjb25zdCBmaWxlID0gaXRlbS5qc29uO1xu
+ICBuZXdTdGF0ZVtmaWxlLmlkXSA9IGZpbGUubW9kaWZpZWRUaW1lO1xufSk7
+XG5wcmV2aW91cy5sYXN0UnVuID0gbmV3U3RhdGU7XG5cbnJldHVybiBuZXdG
+aWxlcy5tYXAoKGYpID0+ICh7IGpzb246IGYuanNvbiB9KSk7XG4iCiAgICAg
+IH0sCiAgICAgICJ0eXBlIjogIm44bi1ub2Rlcy1iYXNlLmNvZGUiLAogICAg
+ICAidHlwZVZlcnNpb24iOiAyLAogICAgICAicG9zaXRpb24iOiBbCiAgICAg
+ICAgLTYyMCwKICAgICAgICAxNTE1CiAgICAgIF0sCiAgICAgICJpZCI6ICIy
+ZmNmM2E4NS05ZTlhLTQwNTgtYTc3Mi0xNWIwNmVmZmI2NzgiLAogICAgICAi
+bmFtZSI6ICJDb2RlIgogICAgfSwKICAgIHsKICAgICAgInBhcmFtZXRlcnMi
+OiB7CiAgICAgICAgIm9wZXJhdGlvbiI6ICJkb3dubG9hZCIsCiAgICAgICAg
+ImZpbGVJZCI6IHsKICAgICAgICAgICJfX3JsIjogdHJ1ZSwKICAgICAgICAg
+ICJ2YWx1ZSI6ICI9e3sgJGpzb24uaWQgfX0iLAogICAgICAgICAgIm1vZGUi
+OiAiaWQiCiAgICAgICAgfSwKICAgICAgICAib3B0aW9ucyI6IHt9CiAgICAg
+IH0sCiAgICAgICJ0eXBlIjogIm44bi1ub2Rlcy1iYXNlLmdvb2dsZURyaXZl
+IiwKICAgICAgInR5cGVWZXJzaW9uIjogMywKICAgICAgInBvc2l0aW9uIjog
+WwogICAgICAgIC02MjAsCiAgICAgICAgOTQ1CiAgICAgIF0sCiAgICAgICJp
+ZCI6ICIwYWQ4MDk1ZC0zOGM0LTQ4OGItOGI2Yy00MmJjYjRhNDljNGEiLAog
+ICAgICAibmFtZSI6ICJEb3dubG9hZCBmaWxlIiwKICAgICAgImNyZWRlbnRp
+YWxzIjogewogICAgICAgICJnb29nbGVEcml2ZU9BdXRoMkFwaSI6IHsKICAg
+ICAgICAgICJpZCI6ICJFcFdUWDFaUGRUOXJVMEFVIiwKICAgICAgICAgICJu
+YW1lIjogIkdvb2dsZSBEcml2ZSBhY2NvdW50IDIiCiAgICAgICAgfQogICAg
+ICB9CiAgICB9LAogICAgewogICAgICAicGFyYW1ldGVycyI6IHsKICAgICAg
+ICAiYXV0aGVudGljYXRpb24iOiAib0F1dGgyIiwKICAgICAgICAicmVzb3Vy
+Y2UiOiAiZmlsZSIsCiAgICAgICAgIm93bmVyIjogewogICAgICAgICAgIl9f
+cmwiOiB0cnVlLAogICAgICAgICAgInZhbHVlIjogIm1hcmlhbS1zb2Z0IiwK
+ICAgICAgICAgICJtb2RlIjogIm5hbWUiCiAgICAgICAgfSwKICAgICAgICAi
+cmVwb3NpdG9yeSI6IHsKICAgICAgICAgICJfX3JsIjogdHJ1ZSwKICAgICAg
+ICAgICJ2YWx1ZSI6ICJuOG4td29ya2Zsb3ciLAogICAgICAgICAgIm1vZGUi
+OiAibGlzdCIsCiAgICAgICAgICAiY2FjaGVkUmVzdWx0TmFtZSI6ICJuOG4t
+d29ya2Zsb3ciLAogICAgICAgICAgImNhY2hlZFJlc3VsdFVybCI6ICJodHRw
+czovL2dpdGh1Yi5jb20vbWFyaWFtLXNvZnQvbjhuLXdvcmtmbG93IgogICAg
+ICAgIH0sCiAgICAgICAgImZpbGVQYXRoIjogIj17eyAkKCdMb29wIE92ZXIg
+SXRlbXMnKS5pdGVtLmpzb24ubmFtZSB9fSIsCiAgICAgICAgImZpbGVDb250
+ZW50IjogIj17eyAkKCdMb29wIE92ZXIgSXRlbXMnKS5pdGVtLmpzb24uZGF0
+YSB9fSIsCiAgICAgICAgImNvbW1pdE1lc3NhZ2UiOiAiQXV0by11cGRhdGUg
+ZnJvbSBHb29nbGUgRHJpdmUiLAogICAgICAgICJhZGRpdGlvbmFsUGFyYW1l
+dGVycyI6IHsKICAgICAgICAgICJhdXRob3IiOiB7CiAgICAgICAgICAgICJu
+YW1lIjogIm1hcmlhbS1zb2Z0IiwKICAgICAgICAgICAgImVtYWlsIjogInRl
+Y2gubWFyaWFtc29mdEBnbWFpbC5jb20iCiAgICAgICAgICB9LAogICAgICAg
+ICAgImJyYW5jaCI6IHsKICAgICAgICAgICAgImJyYW5jaCI6ICJtYWluIgog
+ICAgICAgICAgfQogICAgICAgIH0KICAgICAgfSwKICAgICAgInR5cGUiOiAi
+bjhuLW5vZGVzLWJhc2UuZ2l0aHViIiwKICAgICAgInR5cGVWZXJzaW9uIjog
+MS4xLAogICAgICAicG9zaXRpb24iOiBbCiAgICAgICAgNDgwLAogICAgICAg
+IDk5NQogICAgICBdLAogICAgICAiaWQiOiAiNTEwZWZkZTAtYjkxZS00NDJi
+LWIyMzYtOWIzZmM4YmI4YzZjIiwKICAgICAgIm5hbWUiOiAiQ3JlYXRlIGEg
+ZmlsZSIsCiAgICAgICJ3ZWJob29rSWQiOiAiNzY4NWMyYmUtZDAxMS00YTQz
+LWE4YTAtMDc1ODAwZWFlYWZlIiwKICAgICAgImNyZWRlbnRpYWxzIjogewog
+ICAgICAgICJnaXRodWJPQXV0aDJBcGkiOiB7CiAgICAgICAgICAiaWQiOiAi
+ak16c0tBb1dEMWRnTGVOSyIsCiAgICAgICAgICAibmFtZSI6ICJHaXRIdWIg
+YWNjb3VudCIKICAgICAgICB9CiAgICAgIH0KICAgIH0sCiAgICB7CiAgICAg
+ICJwYXJhbWV0ZXJzIjogewogICAgICAgICJvcGVyYXRpb24iOiAiYmluYXJ5
+VG9Qcm9wZXJ5IiwKICAgICAgICAib3B0aW9ucyI6IHsKICAgICAgICAgICJl
+bmNvZGluZyI6ICJiYXNlNjQiLAogICAgICAgICAgImtlZXBTb3VyY2UiOiAi
+anNvbiIKICAgICAgICB9CiAgICAgIH0sCiAgICAgICJ0eXBlIjogIm44bi1u
+b2Rlcy1iYXNlLmV4dHJhY3RGcm9tRmlsZSIsCiAgICAgICJ0eXBlVmVyc2lv
+biI6IDEsCiAgICAgICJwb3NpdGlvbiI6IFsKICAgICAgICAtNDAwLAogICAg
+ICAgIDk0NQogICAgICBdLAogICAgICAiaWQiOiAiNTJmODAyZWUtNjQ0NC00
+OGRiLTg3NTctYWEyMzBiZGRjYTczIiwKICAgICAgIm5hbWUiOiAiRXh0cmFj
+dCBmcm9tIEZpbGUiCiAgICB9LAogICAgewogICAgICAicGFyYW1ldGVycyI6
+IHsKICAgICAgICAiY29uZGl0aW9ucyI6IHsKICAgICAgICAgICJvcHRpb25z
+IjogewogICAgICAgICAgICAiY2FzZVNlbnNpdGl2ZSI6IHRydWUsCiAgICAg
+ICAgICAgICJsZWZ0VmFsdWUiOiAiIiwKICAgICAgICAgICAgInR5cGVWYWxp
+ZGF0aW9uIjogInN0cmljdCIsCiAgICAgICAgICAgICJ2ZXJzaW9uIjogMgog
+ICAgICAgICAgfSwKICAgICAgICAgICJjb25kaXRpb25zIjogWwogICAgICAg
+ICAgICB7CiAgICAgICAgICAgICAgImlkIjogImIwNWRhMTM3LTU0OGItNDBk
+Zi1iODBkLTFjOGY0NDZkNGI1OCIsCiAgICAgICAgICAgICAgImxlZnRWYWx1
+ZSI6ICI9e3sgJGpzb24ubmFtZSB9fSIsCiAgICAgICAgICAgICAgInJpZ2h0
+VmFsdWUiOiAiIiwKICAgICAgICAgICAgICAib3BlcmF0b3IiOiB7CiAgICAg
+ICAgICAgICAgICAidHlwZSI6ICJzdHJpbmciLAogICAgICAgICAgICAgICAg
+Im9wZXJhdGlvbiI6ICJleGlzdHMiLAogICAgICAgICAgICAgICAgInNpbmds
+ZVZhbHVlIjogdHJ1ZQogICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQog
+ICAgICAgICAgXSwKICAgICAgICAgICJjb21iaW5hdG9yIjogImFuZCIKICAg
+ICAgICB9LAogICAgICAgICJvcHRpb25zIjoge30KICAgICAgfSwKICAgICAg
+InR5cGUiOiAibjhuLW5vZGVzLWJhc2UuaWYiLAogICAgICAidHlwZVZlcnNp
+b24iOiAyLjIsCiAgICAgICJwb3NpdGlvbiI6IFsKICAgICAgICAyNjAsCiAg
+ICAgICAgNzIwCiAgICAgIF0sCiAgICAgICJpZCI6ICJlMzQyYTU1OS00MWJl
+LTQ4MmMtOTM4ZS00NjBiNTAyYWUyNTIiLAogICAgICAibmFtZSI6ICJJZiIK
+ICAgIH0sCiAgICB7CiAgICAgICJwYXJhbWV0ZXJzIjogewogICAgICAgICJh
+dXRoZW50aWNhdGlvbiI6ICJvQXV0aDIiLAogICAgICAgICJyZXNvdXJjZSI6
+ICJmaWxlIiwKICAgICAgICAib3BlcmF0aW9uIjogImVkaXQiLAogICAgICAg
+ICJvd25lciI6IHsKICAgICAgICAgICJfX3JsIjogdHJ1ZSwKICAgICAgICAg
+ICJ2YWx1ZSI6ICJtYXJpYW0tc29mdCIsCiAgICAgICAgICAibW9kZSI6ICJu
+YW1lIgogICAgICAgIH0sCiAgICAgICAgInJlcG9zaXRvcnkiOiB7CiAgICAg
+ICAgICAiX19ybCI6IHRydWUsCiAgICAgICAgICAidmFsdWUiOiAibjhuLXdv
+cmtmbG93IiwKICAgICAgICAgICJtb2RlIjogImxpc3QiLAogICAgICAgICAg
+ImNhY2hlZFJlc3VsdE5hbWUiOiAibjhuLXdvcmtmbG93IiwKICAgICAgICAg
+ICJjYWNoZWRSZXN1bHRVcmwiOiAiaHR0cHM6Ly9naXRodWIuY29tL21hcmlh
+bS1zb2Z0L244bi13b3JrZmxvdyIKICAgICAgICB9LAogICAgICAgICJmaWxl
+UGF0aCI6ICI9e3sgJGpzb24ubmFtZSB9fSIsCiAgICAgICAgImZpbGVDb250
+ZW50IjogIj17eyAkanNvbi5jb250ZW50IH19IiwKICAgICAgICAiY29tbWl0
+TWVzc2FnZSI6ICJ1cGRhdGVkIHRoZSBmaWxlIiwKICAgICAgICAiYWRkaXRp
+b25hbFBhcmFtZXRlcnMiOiB7CiAgICAgICAgICAiYnJhbmNoIjogewogICAg
+ICAgICAgICAiYnJhbmNoIjogIm1haW4iCiAgICAgICAgICB9LAogICAgICAg
+ICAgImF1dGhvciI6IHsKICAgICAgICAgICAgIm5hbWUiOiAibWFyaWFtLXNv
+ZnQiLAogICAgICAgICAgICAiZW1haWwiOiAidGVjaC5tYXJpYW1zb2Z0QGdt
+YWlsLmNvbSIKICAgICAgICAgIH0KICAgICAgICB9CiAgICAgIH0sCiAgICAg
+ICJ0eXBlIjogIm44bi1ub2Rlcy1iYXNlLmdpdGh1YiIsCiAgICAgICJ0eXBl
+VmVyc2lvbiI6IDEuMSwKICAgICAgInBvc2l0aW9uIjogWwogICAgICAgIDQ4
+MCwKICAgICAgICA3OTUKICAgICAgXSwKICAgICAgImlkIjogIjU1Yzk2YWU5
+LTQ1MzMtNDFhMi05ZWYwLWE1NGE4MDc4NzJhOSIsCiAgICAgICJuYW1lIjog
+IkVkaXQgYSBmaWxlIiwKICAgICAgIndlYmhvb2tJZCI6ICJmMjE3OGUyOC0y
+ZGU4LTRlNDYtOTgwMC1iMGI1NTA2NWQxMzgiLAogICAgICAiY3JlZGVudGlh
+bHMiOiB7CiAgICAgICAgImdpdGh1Yk9BdXRoMkFwaSI6IHsKICAgICAgICAg
+ICJpZCI6ICJqTXpzS0FvV0QxZGdMZU5LIiwKICAgICAgICAgICJuYW1lIjog
+IkdpdEh1YiBhY2NvdW50IgogICAgICAgIH0KICAgICAgfQogICAgfSwKICAg
+IHsKICAgICAgInBhcmFtZXRlcnMiOiB7CiAgICAgICAgImF1dGhlbnRpY2F0
+aW9uIjogIm9BdXRoMiIsCiAgICAgICAgInJlc291cmNlIjogImZpbGUiLAog
+ICAgICAgICJvcGVyYXRpb24iOiAiZ2V0IiwKICAgICAgICAib3duZXIiOiB7
+CiAgICAgICAgICAiX19ybCI6IHRydWUsCiAgICAgICAgICAidmFsdWUiOiAi
+bWFyaWFtLXNvZnQiLAogICAgICAgICAgIm1vZGUiOiAibmFtZSIKICAgICAg
+ICB9LAogICAgICAgICJyZXBvc2l0b3J5IjogewogICAgICAgICAgIl9fcmwi
+OiB0cnVlLAogICAgICAgICAgInZhbHVlIjogIm44bi13b3JrZmxvdyIsCiAg
+ICAgICAgICAibW9kZSI6ICJsaXN0IiwKICAgICAgICAgICJjYWNoZWRSZXN1
+bHROYW1lIjogIm44bi13b3JrZmxvdyIsCiAgICAgICAgICAiY2FjaGVkUmVz
+dWx0VXJsIjogImh0dHBzOi8vZ2l0aHViLmNvbS9tYXJpYW0tc29mdC9uOG4t
+d29ya2Zsb3ciCiAgICAgICAgfSwKICAgICAgICAiZmlsZVBhdGgiOiAiPXt7
+ICRqc29uLm5hbWUgfX0iLAogICAgICAgICJhc0JpbmFyeVByb3BlcnR5Ijog
+ZmFsc2UsCiAgICAgICAgImFkZGl0aW9uYWxQYXJhbWV0ZXJzIjoge30KICAg
+ICAgfSwKICAgICAgInR5cGUiOiAibjhuLW5vZGVzLWJhc2UuZ2l0aHViIiwK
+ICAgICAgInR5cGVWZXJzaW9uIjogMS4xLAogICAgICAicG9zaXRpb24iOiBb
+CiAgICAgICAgNDAsCiAgICAgICAgNzIwCiAgICAgIF0sCiAgICAgICJpZCI6
+ICJhODc4NzQyNS0xYTFmLTQzYmQtOGQ0OS05MTFlZTQ4MDhjOWQiLAogICAg
+ICAibmFtZSI6ICJHZXQgYSBmaWxlIiwKICAgICAgIndlYmhvb2tJZCI6ICJk
+OWFiYjFlZC1lMTA2LTQ1YjItODlkNS00MmMwZWJjNWVhNmUiLAogICAgICAi
+YWx3YXlzT3V0cHV0RGF0YSI6IHRydWUsCiAgICAgICJjcmVkZW50aWFscyI6
+IHsKICAgICAgICAiZ2l0aHViT0F1dGgyQXBpIjogewogICAgICAgICAgImlk
+IjogImpNenNLQW9XRDFkZ0xlTksiLAogICAgICAgICAgIm5hbWUiOiAiR2l0
+SHViIGFjY291bnQiCiAgICAgICAgfQogICAgICB9LAogICAgICAib25FcnJv
+ciI6ICJjb250aW51ZVJlZ3VsYXJPdXRwdXQiCiAgICB9LAogICAgewogICAg
+ICAicGFyYW1ldGVycyI6IHsKICAgICAgICAib3B0aW9ucyI6IHt9CiAgICAg
+IH0sCiAgICAgICJ0eXBlIjogIm44bi1ub2Rlcy1iYXNlLnNwbGl0SW5CYXRj
+aGVzIiwKICAgICAgInR5cGVWZXJzaW9uIjogMywKICAgICAgInBvc2l0aW9u
+IjogWwogICAgICAgIC0xODAsCiAgICAgICAgOTQ1CiAgICAgIF0sCiAgICAg
+ICJpZCI6ICI5Y2Y3ZDE4Yy0wYzljLTQ3OGQtYTk3Zi1lZDVjOTJlOTU2ZjMi
+LAogICAgICAibmFtZSI6ICJMb29wIE92ZXIgSXRlbXMiCiAgICB9LAogICAg
+ewogICAgICAicGFyYW1ldGVycyI6IHsKICAgICAgICAib3BlcmF0aW9uIjog
+ImFwcGVuZE9yVXBkYXRlIiwKICAgICAgICAiZG9jdW1lbnRJZCI6IHsKICAg
+ICAgICAgICJfX3JsIjogdHJ1ZSwKICAgICAgICAgICJ2YWx1ZSI6ICIxaHNv
+RklZUFZTYTQzaUt4R3BheXp2dWdXcHZINy0wWGR5NmJEXzN1djhNQSIsCiAg
+ICAgICAgICAibW9kZSI6ICJsaXN0IiwKICAgICAgICAgICJjYWNoZWRSZXN1
+bHROYW1lIjogIm44bi13b3JrZmxvdy1maWxlcyIsCiAgICAgICAgICAiY2Fj
+aGVkUmVzdWx0VXJsIjogImh0dHBzOi8vZG9jcy5nb29nbGUuY29tL3NwcmVh
+ZHNoZWV0cy9kLzFoc29GSVlQVlNhNDNpS3hHcGF5enZ1Z1dwdkg3LTBYZHk2
+YkRfM3V2OE1BL2VkaXQ/dXNwPWRyaXZlc2RrIgogICAgICAgIH0sCiAgICAg
+ICAgInNoZWV0TmFtZSI6IHsKICAgICAgICAgICJfX3JsIjogdHJ1ZSwKICAg
+ICAgICAgICJ2YWx1ZSI6ICJnaWQ9MCIsCiAgICAgICAgICAibW9kZSI6ICJs
+aXN0IiwKICAgICAgICAgICJjYWNoZWRSZXN1bHROYW1lIjogIlNoZWV0MSIs
+CiAgICAgICAgICAiY2FjaGVkUmVzdWx0VXJsIjogImh0dHBzOi8vZG9jcy5n
+b29nbGUuY29tL3NwcmVhZHNoZWV0cy9kLzFoc29GSVlQVlNhNDNpS3hHcGF5
+enZ1Z1dwdkg3LTBYZHk2YkRfM3V2OE1BL2VkaXQjZ2lkPTAiCiAgICAgICAg
+fSwKICAgICAgICAiY29sdW1ucyI6IHsKICAgICAgICAgICJtYXBwaW5nTW9k
+ZSI6ICJhdXRvTWFwSW5wdXREYXRhIiwKICAgICAgICAgICJ2YWx1ZSI6IHt9
+LAogICAgICAgICAgIm1hdGNoaW5nQ29sdW1ucyI6IFsKICAgICAgICAgICAg
+Ik1vZGlmaWVkIFRpbWUiCiAgICAgICAgICBdLAogICAgICAgICAgInNjaGVt
+YSI6IFsKICAgICAgICAgICAgewogICAgICAgICAgICAgICJpZCI6ICJGaWxl
+TmFtZSIsCiAgICAgICAgICAgICAgImRpc3BsYXlOYW1lIjogIkZpbGVOYW1l
+IiwKICAgICAgICAgICAgICAicmVxdWlyZWQiOiBmYWxzZSwKICAgICAgICAg
+ICAgICAiZGVmYXVsdE1hdGNoIjogZmFsc2UsCiAgICAgICAgICAgICAgImRp
+c3BsYXkiOiB0cnVlLAogICAgICAgICAgICAgICJ0eXBlIjogInN0cmluZyIs
+CiAgICAgICAgICAgICAgImNhbkJlVXNlZFRvTWF0Y2giOiB0cnVlLAogICAg
+ICAgICAgICAgICJyZW1vdmVkIjogZmFsc2UKICAgICAgICAgICAgfSwKICAg
+ICAgICAgICAgewogICAgICAgICAgICAgICJpZCI6ICJMYXN0TW9kaWZpZWQi
+LAogICAgICAgICAgICAgICJkaXNwbGF5TmFtZSI6ICJMYXN0TW9kaWZpZWQi
+LAogICAgICAgICAgICAgICJyZXF1aXJlZCI6IGZhbHNlLAogICAgICAgICAg
+ICAgICJkZWZhdWx0TWF0Y2giOiBmYWxzZSwKICAgICAgICAgICAgICAiZGlz
+cGxheSI6IHRydWUsCiAgICAgICAgICAgICAgInR5cGUiOiAic3RyaW5nIiwK
+ICAgICAgICAgICAgICAiY2FuQmVVc2VkVG9NYXRjaCI6IHRydWUsCiAgICAg
+ICAgICAgICAgInJlbW92ZWQiOiBmYWxzZQogICAgICAgICAgICB9LAogICAg
+ICAgICAgICB7CiAgICAgICAgICAgICAgImlkIjogImlkIiwKICAgICAgICAg
+ICAgICAiZGlzcGxheU5hbWUiOiAiaWQiLAogICAgICAgICAgICAgICJyZXF1
+aXJlZCI6IGZhbHNlLAogICAgICAgICAgICAgICJkZWZhdWx0TWF0Y2giOiB0
+cnVlLAogICAgICAgICAgICAgICJkaXNwbGF5IjogdHJ1ZSwKICAgICAgICAg
+ICAgICAidHlwZSI6ICJzdHJpbmciLAogICAgICAgICAgICAgICJjYW5CZVVz
+ZWRUb01hdGNoIjogdHJ1ZSwKICAgICAgICAgICAgICAicmVtb3ZlZCI6IGZh
+bHNlCiAgICAgICAgICAgIH0KICAgICAgICAgIF0sCiAgICAgICAgICAiYXR0
+ZW1wdFRvQ29udmVydFR5cGVzIjogZmFsc2UsCiAgICAgICAgICAiY29udmVy
+dEZpZWxkc1RvU3RyaW5nIjogZmFsc2UKICAgICAgICB9LAogICAgICAgICJv
+cHRpb25zIjoge30KICAgICAgfSwKICAgICAgInR5cGUiOiAibjhuLW5vZGVz
+LWJhc2UuZ29vZ2xlU2hlZXRzIiwKICAgICAgInR5cGVWZXJzaW9uIjogNC42
+LAogICAgICAicG9zaXRpb24iOiBbCiAgICAgICAgLTYyMCwKICAgICAgICAt
+MjYwCiAgICAgIF0sCiAgICAgICJpZCI6ICJlYmY2MzViNC05OTZmLTQyN2Et
+ODNhOS1lZmExMWZjYjY4M2EiLAogICAgICAibmFtZSI6ICJBcHBlbmQgb3Ig
+dXBkYXRlIHJvdyBpbiBzaGVldCIsCiAgICAgICJjcmVkZW50aWFscyI6IHsK
+ICAgICAgICAiZ29vZ2xlU2hlZXRzT0F1dGgyQXBpIjogewogICAgICAgICAg
+ImlkIjogInIyQnNpa0tiMzlrNzZDYVQiLAogICAgICAgICAgIm5hbWUiOiAi
+R29vZ2xlIFNoZWV0cyBhY2NvdW50IgogICAgICAgIH0KICAgICAgfQogICAg
+fSwKICAgIHsKICAgICAgInBhcmFtZXRlcnMiOiB7CiAgICAgICAgImpzQ29k
+ZSI6ICJyZXR1cm4gaXRlbXMubWFwKGl0ZW0gPT4gKHtcbiAganNvbjoge1xu
+ICAgIEZpbGVOYW1lOiBpdGVtLmpzb24ubmFtZSxcbiAgICBMYXN0TW9kaWZp
+ZWQ6IGl0ZW0uanNvbi5tb2RpZmllZFRpbWUsXG4gICAgaWQ6IGl0ZW0uanNv
+bi5pZFxuICB9XG59KSk7IgogICAgICB9LAogICAgICAidHlwZSI6ICJuOG4t
+bm9kZXMtYmFzZS5jb2RlIiwKICAgICAgInR5cGVWZXJzaW9uIjogMiwKICAg
+ICAgInBvc2l0aW9uIjogWwogICAgICAgIC02MjAsCiAgICAgICAgMTI1NQog
+ICAgICBdLAogICAgICAiaWQiOiAiOTRhZWM0ZTEtNDJkOC00MDZhLWJmODMt
+NzU2OTk2Y2M2NWM5IiwKICAgICAgIm5hbWUiOiAiQ29kZTEiCiAgICB9LAog
+ICAgewogICAgICAicGFyYW1ldGVycyI6IHsKICAgICAgICAicHJvbXB0VHlw
+ZSI6ICJkZWZpbmUiLAogICAgICAgICJ0ZXh0IjogIj1TZWFyY2ggdGhlIGRl
+c2lnbmF0ZWQgR29vZ2xlIERyaXZlIHBhdGggYW5kIHJldHJpZXZlIG1ldGFk
+YXRhIGZvciBhbGwgZmlsZXMgYW5kIGZvbGRlcnMgKGlkLCBuYW1lLCBtb2Rp
+ZmllZFRpbWUpLiBBY2Nlc3MgYSBHb29nbGUgU2hlZXQgY29udGFpbmluZyBz
+dG9yZWQgZmlsZSByZWNvcmRzLiBDb21wYXJlIGVhY2ggZmlsZSBhZ2FpbnN0
+IHRoZSBzaGVldDpcblxuSWYgdGhlIGZpbGUgZG9lcyBub3QgZXhpc3QgaW4g
+dGhlIHNoZWV0IOKGkiBtYXJrIGFzIG5ld1xuXG5JZiBtb2RpZmllZFRpbWUg
+aXMgbmV3ZXIgdGhhbiB0aGUgc2hlZXQgcmVjb3JkIOKGkiBtYXJrIGFzIHVw
+ZGF0ZWRcblxuSWdub3JlIHVuY2hhbmdlZCBmaWxlc1xuXG5SZXR1cm4gYW4g
+YXJyYXkgd2l0aCBuZXcgb3IgdXBkYXRlZCBmaWxlcyBpbiB0aGlzIGZvcm1h
+dDpcbltcbiAge1xuICAgIFwiaWRcIjogXCJpZFwiLFxuICAgIFwibmFtZVwi
+OiBcIm5hbWVcIixcbiAgICBcIm1vZGlmaWVkVGltZVwiOiBcIm1vZGlmaWVk
+VGltZVwiXG4gIH1cbl1cblJlc3BvbmQgd2l0aCBvbmx5IHRoZSBKU09OIGFy
+cmF5LCBubyBleHBsYW5hdGlvbi5cbiIsCiAgICAgICAgIm9wdGlvbnMiOiB7
+CiAgICAgICAgICAic3lzdGVtTWVzc2FnZSI6ICJZb3UgYXJlIGEgc21hcnQg
+YXV0b21hdGlvbiBhc3Npc3RhbnQgcnVubmluZyBpbnNpZGUgbjhuLiBZb3Vy
+IHRhc2sgaXMgdG8gbW9uaXRvciBhIHNwZWNpZmljIEdvb2dsZSBEcml2ZSBw
+YXRoLCBkZXRlY3QgbmV3bHkgYWRkZWQgb3IgdXBkYXRlZCBmaWxlcywgYW5k
+IGNvbXBhcmUgdGhlaXIgbWV0YWRhdGEgYWdhaW5zdCBleGlzdGluZyByZWNv
+cmRzIGluIGEgR29vZ2xlIFNoZWV0LlxuXG5CZSBlZmZpY2llbnQsIHByZWNp
+c2UsIGFuZCBhdm9pZCBkdXBsaWNhdGlvbi4gRXhjbHVkZSBhbnkgZmlsZXMg
+dGhhdCBoYXZlbid0IGNoYW5nZWQuIgogICAgICAgIH0KICAgICAgfSwKICAg
+ICAgInR5cGUiOiAiQG44bi9uOG4tbm9kZXMtbGFuZ2NoYWluLmFnZW50IiwK
+ICAgICAgInR5cGVWZXJzaW9uIjogMiwKICAgICAgInBvc2l0aW9uIjogWwog
+ICAgICAgIC0zNjAsCiAgICAgICAgMjAKICAgICAgXSwKICAgICAgImlkIjog
+IjZjNGRlOGY2LThmYmItNDM4OC1hMTZiLTI2MjlhN2VlNWQzNiIsCiAgICAg
+ICJuYW1lIjogIkFJIEFnZW50IgogICAgfSwKICAgIHsKICAgICAgInBhcmFt
+ZXRlcnMiOiB7CiAgICAgICAgIm1vZGVsIjogewogICAgICAgICAgIl9fcmwi
+OiB0cnVlLAogICAgICAgICAgInZhbHVlIjogImdwdC00byIsCiAgICAgICAg
+ICAibW9kZSI6ICJsaXN0IiwKICAgICAgICAgICJjYWNoZWRSZXN1bHROYW1l
+IjogImdwdC00byIKICAgICAgICB9LAogICAgICAgICJvcHRpb25zIjoge30K
+ICAgICAgfSwKICAgICAgInR5cGUiOiAiQG44bi9uOG4tbm9kZXMtbGFuZ2No
+YWluLmxtQ2hhdE9wZW5BaSIsCiAgICAgICJ0eXBlVmVyc2lvbiI6IDEuMiwK
+ICAgICAgInBvc2l0aW9uIjogWwogICAgICAgIC00MDAsCiAgICAgICAgMjQw
+CiAgICAgIF0sCiAgICAgICJpZCI6ICI2OWNhMmE5ZC1iYjIzLTRjMzAtYTBi
+Ny0yMjkxZjAyNGE1OWEiLAogICAgICAibmFtZSI6ICJPcGVuQUkgQ2hhdCBN
+b2RlbCIsCiAgICAgICJjcmVkZW50aWFscyI6IHsKICAgICAgICAib3BlbkFp
+QXBpIjogewogICAgICAgICAgImlkIjogInZJb3IwR2Y0dXI2SEZSNU8iLAog
+ICAgICAgICAgIm5hbWUiOiAiT3BlbkFpIGFjY291bnQiCiAgICAgICAgfQog
+ICAgICB9CiAgICB9LAogICAgewogICAgICAicGFyYW1ldGVycyI6IHsKICAg
+ICAgICAicmVzb3VyY2UiOiAiZmlsZUZvbGRlciIsCiAgICAgICAgInJldHVy
+bkFsbCI6IHRydWUsCiAgICAgICAgImZpbHRlciI6IHsKICAgICAgICAgICJm
+b2xkZXJJZCI6IHsKICAgICAgICAgICAgIl9fcmwiOiB0cnVlLAogICAgICAg
+ICAgICAidmFsdWUiOiAiMVpzS01Ka0l5czRZOFNFODBseUNEU1NjZkdrUDln
+eC16IiwKICAgICAgICAgICAgIm1vZGUiOiAibGlzdCIsCiAgICAgICAgICAg
+ICJjYWNoZWRSZXN1bHROYW1lIjogIm44bi13b3JrZmxvd3MiLAogICAgICAg
+ICAgICAiY2FjaGVkUmVzdWx0VXJsIjogImh0dHBzOi8vZHJpdmUuZ29vZ2xl
+LmNvbS9kcml2ZS9mb2xkZXJzLzFac0tNSmtJeXM0WThTRTgwbHlDRFNTY2ZH
+a1A5Z3gteiIKICAgICAgICAgIH0KICAgICAgICB9LAogICAgICAgICJvcHRp
+b25zIjoge30KICAgICAgfSwKICAgICAgInR5cGUiOiAibjhuLW5vZGVzLWJh
+c2UuZ29vZ2xlRHJpdmVUb29sIiwKICAgICAgInR5cGVWZXJzaW9uIjogMywK
+ICAgICAgInBvc2l0aW9uIjogWwogICAgICAgIC0yODAsCiAgICAgICAgMjQw
+CiAgICAgIF0sCiAgICAgICJpZCI6ICI2MWViZWVhOC1mODU1LTQ4NjktOGVm
+ZC00YzM4MjIyMzA5NmIiLAogICAgICAibmFtZSI6ICJHb29nbGUgRHJpdmUg
+U2VhcmNoIFRvb2wiLAogICAgICAiY3JlZGVudGlhbHMiOiB7CiAgICAgICAg
+Imdvb2dsZURyaXZlT0F1dGgyQXBpIjogewogICAgICAgICAgImlkIjogIkVw
+V1RYMVpQZFQ5clUwQVUiLAogICAgICAgICAgIm5hbWUiOiAiR29vZ2xlIERy
+aXZlIGFjY291bnQgMiIKICAgICAgICB9CiAgICAgIH0KICAgIH0sCiAgICB7
+CiAgICAgICJwYXJhbWV0ZXJzIjogewogICAgICAgICJkb2N1bWVudElkIjog
+ewogICAgICAgICAgIl9fcmwiOiB0cnVlLAogICAgICAgICAgInZhbHVlIjog
+IjFoc29GSVlQVlNhNDNpS3hHcGF5enZ1Z1dwdkg3LTBYZHk2YkRfM3V2OE1B
+IiwKICAgICAgICAgICJtb2RlIjogImxpc3QiLAogICAgICAgICAgImNhY2hl
+ZFJlc3VsdE5hbWUiOiAibjhuLXdvcmtmbG93LWZpbGVzIiwKICAgICAgICAg
+ICJjYWNoZWRSZXN1bHRVcmwiOiAiaHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20v
+c3ByZWFkc2hlZXRzL2QvMWhzb0ZJWVBWU2E0M2lLeEdwYXl6dnVnV3B2SDct
+MFhkeTZiRF8zdXY4TUEvZWRpdD91c3A9ZHJpdmVzZGsiCiAgICAgICAgfSwK
+ICAgICAgICAic2hlZXROYW1lIjogewogICAgICAgICAgIl9fcmwiOiB0cnVl
+LAogICAgICAgICAgInZhbHVlIjogImdpZD0wIiwKICAgICAgICAgICJtb2Rl
+IjogImxpc3QiLAogICAgICAgICAgImNhY2hlZFJlc3VsdE5hbWUiOiAiU2hl
+ZXQxIiwKICAgICAgICAgICJjYWNoZWRSZXN1bHRVcmwiOiAiaHR0cHM6Ly9k
+b2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvMWhzb0ZJWVBWU2E0M2lL
+eEdwYXl6dnVnV3B2SDctMFhkeTZiRF8zdXY4TUEvZWRpdCNnaWQ9MCIKICAg
+ICAgICB9LAogICAgICAgICJvcHRpb25zIjoge30KICAgICAgfSwKICAgICAg
+InR5cGUiOiAibjhuLW5vZGVzLWJhc2UuZ29vZ2xlU2hlZXRzVG9vbCIsCiAg
+ICAgICJ0eXBlVmVyc2lvbiI6IDQuNiwKICAgICAgInBvc2l0aW9uIjogWwog
+ICAgICAgIC0xNjAsCiAgICAgICAgMjQwCiAgICAgIF0sCiAgICAgICJpZCI6
+ICI2M2U1YWNmNi1mMDMwLTQ5NzUtOGRkOC1kMzdlMzY0OTVjOWIiLAogICAg
+ICAibmFtZSI6ICJHZXQgcm93KHMpIGluIHNoZWV0IGluIEdvb2dsZSBTaGVl
+dHMiLAogICAgICAiY3JlZGVudGlhbHMiOiB7CiAgICAgICAgImdvb2dsZVNo
+ZWV0c09BdXRoMkFwaSI6IHsKICAgICAgICAgICJpZCI6ICJyMkJzaWtLYjM5
+azc2Q2FUIiwKICAgICAgICAgICJuYW1lIjogIkdvb2dsZSBTaGVldHMgYWNj
+b3VudCIKICAgICAgICB9CiAgICAgIH0KICAgIH0KICBdLAogICJwaW5EYXRh
+Ijoge30sCiAgImNvbm5lY3Rpb25zIjogewogICAgIlNjaGVkdWxlIFRyaWdn
+ZXIiOiB7CiAgICAgICJtYWluIjogWwogICAgICAgIFsKICAgICAgICAgIHsK
+ICAgICAgICAgICAgIm5vZGUiOiAiQUkgQWdlbnQiLAogICAgICAgICAgICAi
+dHlwZSI6ICJtYWluIiwKICAgICAgICAgICAgImluZGV4IjogMAogICAgICAg
+ICAgfQogICAgICAgIF0KICAgICAgXQogICAgfSwKICAgICJTZWFyY2ggZmls
+ZXMgYW5kIGZvbGRlcnMiOiB7CiAgICAgICJtYWluIjogWwogICAgICAgIFtd
+CiAgICAgIF0KICAgIH0sCiAgICAiQ29kZSI6IHsKICAgICAgIm1haW4iOiBb
+CiAgICAgICAgW10KICAgICAgXQogICAgfSwKICAgICJEb3dubG9hZCBmaWxl
+IjogewogICAgICAibWFpbiI6IFsKICAgICAgICBbCiAgICAgICAgICB7CiAg
+ICAgICAgICAgICJub2RlIjogIkV4dHJhY3QgZnJvbSBGaWxlIiwKICAgICAg
+ICAgICAgInR5cGUiOiAibWFpbiIsCiAgICAgICAgICAgICJpbmRleCI6IDAK
+ICAgICAgICAgIH0KICAgICAgICBdCiAgICAgIF0KICAgIH0sCiAgICAiRXh0
+cmFjdCBmcm9tIEZpbGUiOiB7CiAgICAgICJtYWluIjogWwogICAgICAgIFsK
+ICAgICAgICAgIHsKICAgICAgICAgICAgIm5vZGUiOiAiTG9vcCBPdmVyIEl0
+ZW1zIiwKICAgICAgICAgICAgInR5cGUiOiAibWFpbiIsCiAgICAgICAgICAg
+ICJpbmRleCI6IDAKICAgICAgICAgIH0KICAgICAgICBdCiAgICAgIF0KICAg
+IH0sCiAgICAiSWYiOiB7CiAgICAgICJtYWluIjogWwogICAgICAgIFsKICAg
+ICAgICAgIHsKICAgICAgICAgICAgIm5vZGUiOiAiRWRpdCBhIGZpbGUiLAog
+ICAgICAgICAgICAidHlwZSI6ICJtYWluIiwKICAgICAgICAgICAgImluZGV4
+IjogMAogICAgICAgICAgfQogICAgICAgIF0sCiAgICAgICAgWwogICAgICAg
+ICAgewogICAgICAgICAgICAibm9kZSI6ICJDcmVhdGUgYSBmaWxlIiwKICAg
+ICAgICAgICAgInR5cGUiOiAibWFpbiIsCiAgICAgICAgICAgICJpbmRleCI6
+IDAKICAgICAgICAgIH0KICAgICAgICBdCiAgICAgIF0KICAgIH0sCiAgICAi
+R2V0IGEgZmlsZSI6IHsKICAgICAgIm1haW4iOiBbCiAgICAgICAgWwogICAg
+ICAgICAgewogICAgICAgICAgICAibm9kZSI6ICJJZiIsCiAgICAgICAgICAg
+ICJ0eXBlIjogIm1haW4iLAogICAgICAgICAgICAiaW5kZXgiOiAwCiAgICAg
+ICAgICB9CiAgICAgICAgXQogICAgICBdCiAgICB9LAogICAgIkxvb3AgT3Zl
+ciBJdGVtcyI6IHsKICAgICAgIm1haW4iOiBbCiAgICAgICAgW10sCiAgICAg
+ICAgWwogICAgICAgICAgewogICAgICAgICAgICAibm9kZSI6ICJHZXQgYSBm
+aWxlIiwKICAgICAgICAgICAgInR5cGUiOiAibWFpbiIsCiAgICAgICAgICAg
+ICJpbmRleCI6IDAKICAgICAgICAgIH0KICAgICAgICBdCiAgICAgIF0KICAg
+IH0sCiAgICAiQ3JlYXRlIGEgZmlsZSI6IHsKICAgICAgIm1haW4iOiBbCiAg
+ICAgICAgWwogICAgICAgICAgewogICAgICAgICAgICAibm9kZSI6ICJMb29w
+IE92ZXIgSXRlbXMiLAogICAgICAgICAgICAidHlwZSI6ICJtYWluIiwKICAg
+ICAgICAgICAgImluZGV4IjogMAogICAgICAgICAgfQogICAgICAgIF0KICAg
+ICAgXQogICAgfSwKICAgICJFZGl0IGEgZmlsZSI6IHsKICAgICAgIm1haW4i
+OiBbCiAgICAgICAgWwogICAgICAgICAgewogICAgICAgICAgICAibm9kZSI6
+ICJMb29wIE92ZXIgSXRlbXMiLAogICAgICAgICAgICAidHlwZSI6ICJtYWlu
+IiwKICAgICAgICAgICAgImluZGV4IjogMAogICAgICAgICAgfQogICAgICAg
+IF0KICAgICAgXQogICAgfSwKICAgICJDb2RlMSI6IHsKICAgICAgIm1haW4i
+OiBbCiAgICAgICAgW10KICAgICAgXQogICAgfSwKICAgICJPcGVuQUkgQ2hh
+dCBNb2RlbCI6IHsKICAgICAgImFpX2xhbmd1YWdlTW9kZWwiOiBbCiAgICAg
+ICAgWwogICAgICAgICAgewogICAgICAgICAgICAibm9kZSI6ICJBSSBBZ2Vu
+dCIsCiAgICAgICAgICAgICJ0eXBlIjogImFpX2xhbmd1YWdlTW9kZWwiLAog
+ICAgICAgICAgICAiaW5kZXgiOiAwCiAgICAgICAgICB9CiAgICAgICAgXQog
+ICAgICBdCiAgICB9LAogICAgIkdvb2dsZSBEcml2ZSBTZWFyY2ggVG9vbCI6
+IHsKICAgICAgImFpX3Rvb2wiOiBbCiAgICAgICAgWwogICAgICAgICAgewog
+ICAgICAgICAgICAibm9kZSI6ICJBSSBBZ2VudCIsCiAgICAgICAgICAgICJ0
+eXBlIjogImFpX3Rvb2wiLAogICAgICAgICAgICAiaW5kZXgiOiAwCiAgICAg
+ICAgICB9CiAgICAgICAgXQogICAgICBdCiAgICB9LAogICAgIkdldCByb3co
+cykgaW4gc2hlZXQgaW4gR29vZ2xlIFNoZWV0cyI6IHsKICAgICAgImFpX3Rv
+b2wiOiBbCiAgICAgICAgWwogICAgICAgICAgewogICAgICAgICAgICAibm9k
+ZSI6ICJBSSBBZ2VudCIsCiAgICAgICAgICAgICJ0eXBlIjogImFpX3Rvb2wi
+LAogICAgICAgICAgICAiaW5kZXgiOiAwCiAgICAgICAgICB9CiAgICAgICAg
+XQogICAgICBdCiAgICB9CiAgfSwKICAiYWN0aXZlIjogZmFsc2UsCiAgInNl
+dHRpbmdzIjogewogICAgImV4ZWN1dGlvbk9yZGVyIjogInYxIgogIH0sCiAg
+InZlcnNpb25JZCI6ICIwNGUyOGJkMC1iOTE1LTRjOTctYmM3OS0wM2M4MGM4
+M2Y2ZmEiLAogICJtZXRhIjogewogICAgInRlbXBsYXRlQ3JlZHNTZXR1cENv
+bXBsZXRlZCI6IHRydWUsCiAgICAiaW5zdGFuY2VJZCI6ICI3Y2VjZTk5ZDVk
+ZjU4MTAwM2FkMzA5OTNmOGI4ZjkxODUwYmI0ODc2YWFlYTg1Y2VjMmI1Yzc5
+YTg0NjZmM2NkIgogIH0sCiAgImlkIjogIjJJcmN1WHlnNnY4Qjdac1oiLAog
+ICJ0YWdzIjogW10KfQ==
