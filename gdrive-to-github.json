@@ -1,0 +1,641 @@
+{
+  "name": "gdrive-to-github",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -620,
+        20
+      ],
+      "id": "d38c3191-f0b5-409e-97e6-cb919008cc6b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1ZsKMJkIys4Y8SE80lyCDSScfGkP9gx-z",
+            "mode": "list",
+            "cachedResultName": "n8n-workflows",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1ZsKMJkIys4Y8SE80lyCDSScfGkP9gx-z"
+          }
+        },
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -620,
+        380
+      ],
+      "id": "2e4f9ed9-d23c-4da8-b8f6-4578254f54d8",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EpWTX1ZPdT9rU0AU",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Load previous run state (you'll store this using n8n Static Data)\nconst previous = $getWorkflowStaticData(\"global\");\nconst lastRun = previous.lastRun || {};\n\nconst newFiles = $input.all().filter((item) => {\n  const file = item.json;\n  return !lastRun[file.id] || lastRun[file.id] !== file.modifiedTime;\n});\n\n// Update state for next run\nconst newState = {};\n$input.all().forEach((item) => {\n  const file = item.json;\n  newState[file.id] = file.modifiedTime;\n});\nprevious.lastRun = newState;\n\nreturn newFiles.map((f) => ({ json: f.json }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -620,
+        1515
+      ],
+      "id": "2fcf3a85-9e9a-4058-a772-15b06effb678",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -620,
+        945
+      ],
+      "id": "0ad8095d-38c4-488b-8b6c-42bcb4a49c4a",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EpWTX1ZPdT9rU0AU",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "mariam-soft",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflow",
+          "mode": "list",
+          "cachedResultName": "n8n-workflow",
+          "cachedResultUrl": "https://github.com/mariam-soft/n8n-workflow"
+        },
+        "filePath": "={{ $('Loop Over Items').item.json.name }}",
+        "fileContent": "={{ $('Loop Over Items').item.json.data }}",
+        "commitMessage": "Auto-update from Google Drive",
+        "additionalParameters": {
+          "author": {
+            "name": "mariam-soft",
+            "email": "tech.mariamsoft@gmail.com"
+          },
+          "branch": {
+            "branch": "main"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        995
+      ],
+      "id": "510efde0-b91e-442b-b236-9b3fc8bb8c6c",
+      "name": "Create a file",
+      "webhookId": "7685c2be-d011-4a43-a8a0-075800eaeafe",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "jMzsKAoWD1dgLeNK",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {
+          "encoding": "base64",
+          "keepSource": "json"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        945
+      ],
+      "id": "52f802ee-6444-48db-8757-aa230bddca73",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b05da137-548b-40df-b80d-1c8f446d4b58",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        720
+      ],
+      "id": "e342a559-41be-482c-938e-460b502ae252",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "mariam-soft",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflow",
+          "mode": "list",
+          "cachedResultName": "n8n-workflow",
+          "cachedResultUrl": "https://github.com/mariam-soft/n8n-workflow"
+        },
+        "filePath": "={{ $json.name }}",
+        "fileContent": "={{ $json.content }}",
+        "commitMessage": "updated the file",
+        "additionalParameters": {
+          "branch": {
+            "branch": "main"
+          },
+          "author": {
+            "name": "mariam-soft",
+            "email": "tech.mariamsoft@gmail.com"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        795
+      ],
+      "id": "55c96ae9-4533-41a2-9ef0-a54a807872a9",
+      "name": "Edit a file",
+      "webhookId": "f2178e28-2de8-4e46-9800-b0b55065d138",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "jMzsKAoWD1dgLeNK",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "mariam-soft",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflow",
+          "mode": "list",
+          "cachedResultName": "n8n-workflow",
+          "cachedResultUrl": "https://github.com/mariam-soft/n8n-workflow"
+        },
+        "filePath": "={{ $json.name }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        40,
+        720
+      ],
+      "id": "a8787425-1a1f-43bd-8d49-911ee4808c9d",
+      "name": "Get a file",
+      "webhookId": "d9abb1ed-e106-45b2-89d5-42c0ebc5ea6e",
+      "alwaysOutputData": true,
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "jMzsKAoWD1dgLeNK",
+          "name": "GitHub account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        945
+      ],
+      "id": "9cf7d18c-0c9c-478d-a97f-ed5c92e956f3",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA",
+          "mode": "list",
+          "cachedResultName": "n8n-workflow-files",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Modified Time"
+          ],
+          "schema": [
+            {
+              "id": "FileName",
+              "displayName": "FileName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LastModified",
+              "displayName": "LastModified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -620,
+        -260
+      ],
+      "id": "ebf635b4-996f-427a-83a9-efa11fcb683a",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "r2BsikKb39k76CaT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => ({\n  json: {\n    FileName: item.json.name,\n    LastModified: item.json.modifiedTime,\n    id: item.json.id\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -620,
+        1255
+      ],
+      "id": "94aec4e1-42d8-406a-bf83-756996cc65c9",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Search the designated Google Drive path and retrieve metadata for all files and folders (id, name, modifiedTime). Access a Google Sheet containing stored file records. Compare each file against the sheet:\n\nIf the file does not exist in the sheet → mark as new\n\nIf modifiedTime is newer than the sheet record → mark as updated\n\nIgnore unchanged files\n\nReturn an array with new or updated files in this format:\n[\n  {\n    \"id\": \"id\",\n    \"name\": \"name\",\n    \"modifiedTime\": \"modifiedTime\"\n  }\n]\nRespond with only the JSON array, no explanation.\n",
+        "options": {
+          "systemMessage": "You are a smart automation assistant running inside n8n. Your task is to monitor a specific Google Drive path, detect newly added or updated files, and compare their metadata against existing records in a Google Sheet.\n\nBe efficient, precise, and avoid duplication. Exclude any files that haven't changed."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -360,
+        20
+      ],
+      "id": "6c4de8f6-8fbb-4388-a16b-2629a7ee5d36",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        240
+      ],
+      "id": "69ca2a9d-bb23-4c30-a0b7-2291f024a59a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vIor0Gf4ur6HFR5O",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1ZsKMJkIys4Y8SE80lyCDSScfGkP9gx-z",
+            "mode": "list",
+            "cachedResultName": "n8n-workflows",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1ZsKMJkIys4Y8SE80lyCDSScfGkP9gx-z"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        -280,
+        240
+      ],
+      "id": "61ebeea8-f855-4869-8efd-4c382223096b",
+      "name": "Google Drive Search Tool",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EpWTX1ZPdT9rU0AU",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA",
+          "mode": "list",
+          "cachedResultName": "n8n-workflow-files",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hsoFIYPVSa43iKxGpayzvugWpvH7-0Xdy6bD_3uv8MA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        -160,
+        240
+      ],
+      "id": "63e5acf6-f030-4975-8dd8-d37e36495c9b",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "r2BsikKb39k76CaT",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a file": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit a file": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Search Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "04e28bd0-b915-4c97-bc79-03c80c83f6fa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7cece99d5df581003ad30993f8b8f91850bb4876aaea85cec2b5c79a8466f3cd"
+  },
+  "id": "2IrcuXyg6v8B7ZsZ",
+  "tags": []
+}
